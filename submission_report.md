@@ -1,68 +1,74 @@
-# FINAL PROJECT REPORT: WIRELESS AND MOBILE PROGRAMMING
+# TECHNICAL REPORT: PRESUNIVGO CROSS-PLATFORM SYSTEM
+## FINAL PROJECT — WIRELESS AND MOBILE PROGRAMMING
 
-**Project Name:** PresUnivGo (Exclusively for President University)
-**Subject:** Wireless and Mobile Programming
-**Student Name:** Wisnu Ashar
-**Student ID:** [Your ID Here]
-**Email:** wisnu.ashar@student.president.ac.id
-**GitHub Link:** https://github.com/wi5nuu/presunivgo.git
-**Hosting URL:** https://puconnect-9e8fb.web.app
-
----
-
-## 1. Project Description
-**PresUnivGo** is a professional networking and community-centric mobile application designed to foster a robust ecosystem within President University. The application serves as a centralized hub where students, alumni, and faculty can interact, share professional achievements, and access campus-exclusive opportunities. 
-
-In an era where professional networking is fragmented, PresUnivGo provides a focused environment that aligns with the academic and professional culture of President University. It integrates high-fidelity design with real-time backend services to provide a premium user experience on both mobile and web platforms.
+**Student Name:** Wisnu Ashar  
+**Student ID:** [Your ID]  
+**Faculty:** Computing  
+**Subject:** Wireless and Mobile Programming  
+**University:** President University  
 
 ---
 
-## 2. Problem Statement
-The President University community currently lacks a dedicated, unified platform for professional networking. Existing social media platforms are too broad, leading to professional updates being buried under casual content. Specifically:
-- **Networking Gaps**: Students often find it difficult to connect with alumni for career guidance.
-- **Fragmented Information**: Job opportunities and club activities are shared through various unmanaged groups (WhatsApp, Telegram), making them easy to miss.
-- **Static Profiles**: Standard campus portals do not allow students to showcase their dynamic skill sets or real-time professional progress.
+## 1. ABSTRACT
+This report documents the architectural design, implementation, and deployment of **PresUnivGo**, a high-fidelity professional networking application engineered exclusively for the President University ecosystem. The project leverages the **Flutter SDK** and **Firebase Serverless Infrastructure** to deliver a unified, real-time community experience. The system emphasizes **Clean Architecture**, **Reactive State Management**, and **Premium UI/UX** paradigms to solve fragmented communication challenges within the campus environment.
 
 ---
 
-## 3. Proposed Solution
-PresUnivGo addresses these challenges by implementing:
-- **Centralized Campus Feed**: A dedicated professional stream for President University members only.
-- **Dynamic Skill Tracking**: A profile system that allows real-time updates of Experience, Education, and Skills, synchronized across all devices via Firestore.
-- **Real-Time Story System**: A visual storytelling feature for sharing immediate professional or campus-related updates.
-- **Exclusive Marketplace**: Dedicated modules for Student Clubs and Job Opportunities, ensuring information reaches the target audience effectively.
+## 2. INTRODUCTION
+Digital networking within academic institutions is often decentralized, relying on broad-market social media platforms that dilute professional focus. **PresUnivGo** addresses this by providing a specialized, high-security environment for President University students and alumni. This report outlines the technical solutions implemented to facilitate real-time engagement, career tracking, and community organizational management.
 
 ---
 
-## 4. Technical Specifications
-
-### 4.1. Frontend Architecture
-The application is built using **Flutter** and the **Dart** programming language. It leverages **Riverpod** for state management, following the **Clean Architecture** pattern:
-- **Domain Layer**: Pure business logic and entity definitions.
-- **Data Layer**: Implementation of repository patterns and data sources (Firebase).
-- **Presentation Layer**: UI components using Material 3 and custom design tokens.
-
-### 4.2. Backend Infrastructure
-- **Authentication**: Firebase Auth (Email/Password and Google Sign-In integration).
-- **NoSQL Database**: Cloud Firestore for real-time data persistence and synchronization.
-- **Cloud Storage**: Firebase Storage for media-rich content (Profile images, story uploads).
-- **Hosting**: Firebase Hosting for the web distribution of the cross-platform application.
+## 3. PROBLEM STATEMENT
+Fragmentation of professional data and communication channels at President University leads to:
+1.  **Low Visibility**: Internship and career achievements are lost in casual group chats.
+2.  **Stagnant Networking**: Difficulty in identifying and connecting with peers based on specific skills or faculties.
+3.  **Inefficient Information Flow**: Campus-exclusive job opportunities lack a centralized, searchable repository.
 
 ---
 
-## 5. Key Features & Implementation
-- **Premium Wave UI**: Custom-designed login and onboarding screens using advanced `CustomClipper` Bezier paths.
-- **Real-Time Messaging**: A high-fidelity chat system connecting all participants.
-- **Faculty-Specific Logic**: A hierarchical major selection system covering all PU faculties (Business, Engineering, Computing, Social Sciences, Art & Design, Law, and Medicine).
-- **Interactive Posts**: Support for rich reactions (Likes) and threaded conversations (Comments) using atomic Firestore updates.
+## 4. SYSTEM ARCHITECTURE
+
+### 4.1. The "Clean Architecture" Pattern
+The application core is developed using a multi-layered approach to maximize modularity and maintainability:
+-   **Domain Layer**: Encapsulates pure business entities (e.g., `UserEntity`, `PostEntity`) and repository contracts. This layer is platform-agnostic.
+-   **Data Layer**: Responsible for external data mapping. It converts Firestore JSON into typed Models and implements the repositories using `FirebaseFirestore` and `FirebaseStorage` SDKs.
+-   **Presentation Layer**: Utilizes the **Riverpod** state management ecosystem. It employs `StateNotifierProvider` to observe business logic and `AsyncValue` to handle network states (Loading, Data, Error) reactively.
+
+### 4.2. Cloud Infrastructure (MBaaS)
+The system utilizes a tailored Firebase implementation:
+-   **Authentication Layer**: Secure JWT-based auth with integrated Google OAuth support.
+-   **NoSQL Data Tier**: Cloud Firestore handles sub-second real-time synchronization for the Feed and Messaging modules.
+-   **Media Tier**: Firebase Storage utilizes optimized blob storage for user-generated content (Stories and Profiles).
 
 ---
 
-## 6. Screenshots & Results
-The application successfully delivers a premium "Dark Teal & Cream" aesthetic across all key modules:
-(Please refer to the screenshots provided in the submission folder or the README.md)
+## 5. TECHNICAL IMPLEMENTATION DETAILS
+
+### 5.1. Premium UI/UX Engineering
+-   **Wave Interaction**: Implemented custom `Bezier` math and `CustomClipper` classes to create unique transition headers, moving beyond standard Material presets.
+-   **Dynamic Theming**: A central design token system (`AppColors`) governs the Dark Teal & Cream palette, ensuring global visual consistency.
+-   **Responsive Layouts**: Extensive use of `Sliver` widgets and `CustomScrollView` ensures the interface adapts seamlessly between Android, iOS, and Web viewports.
+
+### 5.2. Functional Modules
+-   **Deep-Linked Identity**: A profile system that supports hierarchical data sync for Experience, Education, and Skills, utilizing Firestore's `SetOptions(merge: true)` for non-destructive updates.
+-   **Real-Time Analytics Integration**: Atomic counter updates for post reactions (Likes) to prevent data race conditions during high-volume interaction.
 
 ---
 
-## 7. Conclusion
-PresUnivGo demonstrates the successful integration of modern mobile development frameworks with scalable cloud services. It fulfills the requirements for the Wireless and Mobile Programming course by providing a functional, cross-platform solution to a real-world campus problem, emphasizing high-fidelity design and technical robustness.
+## 6. VERIFICATION & DEPLOYMENT
+-   **Web Distribution**: The application is deployed via **Firebase Hosting** using a multi-phase build pipeline:
+    -   *Phase 1*: Flutter Release Asset Generation.
+    -   *Phase 2*: CDN Edge Deployment.
+-   **Live Link**: [https://puconnect-9e8fb.web.app](https://puconnect-9e8fb.web.app)
+
+---
+
+## 7. CONCLUSION
+PresUnivGo represents a robust application of modern mobile programming principles. By combining high-performance frontend frameworks with scalable cloud backends and a strict adherence to architectural best practices, the system provides a scalable solution for institutional networking.
+
+---
+
+**Wisnu Ashar**  
+*Wireless and Mobile Programming Final Project*  
+*President University, 2026*
