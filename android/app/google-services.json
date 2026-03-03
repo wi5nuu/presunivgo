@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "254034416381",
+    "project_id": "puconnect-9e8fb",
+    "storage_bucket": "puconnect-9e8fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254034416381:android:dbf02d3072aeebe3fce494",
+        "android_client_info": {
+          "package_name": "id.ac.president.presunivgo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrdd7gloEk5T1QM_R0jCAceaNBrrO_q34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254034416381:android:66f1e448f05c2013fce494",
+        "android_client_info": {
+          "package_name": "id.ac.president.presunivgo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrdd7gloEk5T1QM_R0jCAceaNBrrO_q34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

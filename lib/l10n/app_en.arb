@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "appTitle": "PresUnivGo",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "createAccount": "Create Account",
+  "welcomeBack": "Welcome Back"
+}

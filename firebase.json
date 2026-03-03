@@ -1,0 +1,44 @@
+{
+    "firestore": {
+        "rules": "firebase/firestore.rules",
+        "indexes": "firebase/firestore.indexes.json"
+    },
+    "storage": {
+        "rules": "firebase/storage.rules"
+    },
+    "hosting": {
+        "public": "build/web",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    },
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "puconnect-9e8fb",
+                    "appId": "1:254034416381:android:dbf02d3072aeebe3fce494",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "puconnect-9e8fb",
+                    "configurations": {
+                        "android": "1:254034416381:android:dbf02d3072aeebe3fce494",
+                        "ios": "1:254034416381:ios:65469db0bebfe705fce494",
+                        "web": "1:254034416381:web:02d9d76d2ff226d8fce494"
+                    }
+                }
+            }
+        }
+    }
+}
