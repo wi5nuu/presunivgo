@@ -53,7 +53,11 @@ class StoryBar extends ConsumerWidget {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return _buildAddStory(
-                    context, ref, profileState.value, uploadingState.isLoading);
+                    context,
+                    ref,
+                    profileState.value,
+                    uploadingState.uploadStatus.isLoading,
+                    uploadingState.progress);
               }
               return _buildStoryItem(context, displayStories[index - 1]);
             },
@@ -65,8 +69,8 @@ class StoryBar extends ConsumerWidget {
     );
   }
 
-  Widget _buildAddStory(
-      BuildContext context, WidgetRef ref, dynamic user, bool isUploading) {
+  Widget _buildAddStory(BuildContext context, WidgetRef ref, dynamic user,
+      bool isUploading, double progress) {
     return Padding(
       padding: const EdgeInsets.only(right: 16),
       child: GestureDetector(
@@ -89,7 +93,8 @@ class StoryBar extends ConsumerWidget {
                         : null,
                     child: user?.profileImageUrl == null || isUploading
                         ? (isUploading
-                            ? const CircularProgressIndicator(strokeWidth: 2)
+                            ? CircularProgressIndicator(
+                                value: progress, strokeWidth: 2)
                             : const Icon(Icons.person,
                                 color: AppColors.textHint, size: 30))
                         : null,

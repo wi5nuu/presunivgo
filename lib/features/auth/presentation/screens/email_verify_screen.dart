@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,11 +7,43 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/pu_button.dart';
 import '../providers/auth_provider.dart';
 
-class EmailVerifyScreen extends ConsumerWidget {
+class EmailVerifyScreen extends ConsumerStatefulWidget {
   const EmailVerifyScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EmailVerifyScreen> createState() => _EmailVerifyScreenState();
+}
+
+class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startVerificationCheck();
+  }
+
+  void _startVerificationCheck() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.reload();
+        if (user.emailVerified && mounted) {
+          timer.cancel();
+          context.go('/dashboard');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(
       authControllerProvider,
       (previous, next) {

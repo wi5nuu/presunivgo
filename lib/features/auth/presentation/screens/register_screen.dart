@@ -21,11 +21,43 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _companyController = TextEditingController();
-  final UserRole _detectedRole = UserRole.student;
+  UserRole _detectedRole = UserRole.student;
   ActivityStatus _activityStatus = ActivityStatus.student;
   String? _selectedFaculty;
   String? _selectedMajor;
+  int _selectedBatch = DateTime.now().year;
   bool _acceptedTerms = false;
+  int _passwordStrength = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_calculatePasswordStrength);
+    _emailController.addListener(_detectRoleFromEmail);
+  }
+
+  void _calculatePasswordStrength() {
+    final password = _passwordController.text;
+    int strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.contains(RegExp(r'[A-Z]'))) strength++;
+    if (password.contains(RegExp(r'[0-9]'))) strength++;
+    if (password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) strength++;
+    setState(() => _passwordStrength = strength);
+  }
+
+  void _detectRoleFromEmail() {
+    final email = _emailController.text.trim().toLowerCase();
+    UserRole newRole = UserRole.student;
+    if (email.endsWith('@student.president.ac.id')) {
+      newRole = UserRole.student;
+    } else if (email.endsWith('@alumni.president.ac.id')) {
+      newRole = UserRole.alumni;
+    } else if (email.endsWith('@president.ac.id')) {
+      newRole = UserRole.lecturer;
+    }
+    if (_detectedRole != newRole) setState(() => _detectedRole = newRole);
+  }
 
   final Map<String, List<String>> _majorsByFaculty = {
     'Faculty of Business': [
@@ -122,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [AppColors.primary, AppColors.secondary],
+                          colors: [AppColors.navy, AppColors.primary],
                         ),
                       ),
                     ),
@@ -189,33 +221,108 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             hintText: 'user@student.president.ac.id',
                             keyboardType: TextInputType.emailAddress,
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Status',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: AppColors.textSecondary),
-                          ),
                           const SizedBox(height: 8),
-                          DropdownButtonFormField<ActivityStatus>(
-                            value: _activityStatus,
-                            onChanged: (val) => setState(() => _activityStatus =
-                                val ?? ActivityStatus.student),
-                            items: ActivityStatus.values
-                                .map((s) => DropdownMenuItem(
-                                    value: s,
-                                    child: Text(s.name.toUpperCase())))
-                                .toList(),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.surfaceVariant,
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
+                          if (_emailController.text.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.verified_user,
+                                      size: 16, color: AppColors.primary),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Detected Role: ${_detectedRole.name.toUpperCase()}',
+                                    style: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                ],
+                              ),
                             ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Status',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary)),
+                                    const SizedBox(height: 8),
+                                    DropdownButtonFormField<ActivityStatus>(
+                                      value: _activityStatus,
+                                      onChanged: (val) => setState(() =>
+                                          _activityStatus =
+                                              val ?? ActivityStatus.student),
+                                      items: ActivityStatus.values
+                                          .map((s) => DropdownMenuItem(
+                                              value: s,
+                                              child:
+                                                  Text(s.name.toUpperCase())))
+                                          .toList(),
+                                      decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: AppColors.surfaceVariant,
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            borderSide: BorderSide.none),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Batch/Year',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary)),
+                                    const SizedBox(height: 8),
+                                    DropdownButtonFormField<int>(
+                                      value: _selectedBatch,
+                                      onChanged: (val) => setState(() =>
+                                          _selectedBatch =
+                                              val ?? DateTime.now().year),
+                                      items: List.generate(15, (index) {
+                                        final year =
+                                            DateTime.now().year - index + 3;
+                                        return DropdownMenuItem(
+                                            value: year,
+                                            child: Text(year.toString()));
+                                      }),
+                                      decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: AppColors.surfaceVariant,
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            borderSide: BorderSide.none),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           if (_activityStatus == ActivityStatus.internship ||
                               _activityStatus == ActivityStatus.working) ...[
@@ -280,6 +387,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             label: 'Password',
                             isPassword: true,
                             obscureText: true,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Text('Strength: ',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary)),
+                              Expanded(
+                                child: Row(
+                                  children: List.generate(4, (index) {
+                                    return Expanded(
+                                      child: Container(
+                                        height: 4,
+                                        margin: EdgeInsets.only(
+                                            right: index < 3 ? 4 : 0),
+                                        decoration: BoxDecoration(
+                                          color: index < _passwordStrength
+                                              ? (_passwordStrength == 1
+                                                  ? AppColors.error
+                                                  : _passwordStrength == 2 ||
+                                                          _passwordStrength == 3
+                                                      ? AppColors.warning
+                                                      : AppColors.success)
+                                              : AppColors.border,
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/pu_button.dart';
@@ -115,7 +116,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 _isLastPage
                     ? PUButton(
                         text: "Get Started",
-                        onPressed: () => context.go('/login'),
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('has_seen_onboarding', true);
+                          if (context.mounted) {
+                            context.go('/login');
+                          }
+                        },
                       ).animate().fadeIn().scale()
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

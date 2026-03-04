@@ -8,59 +8,73 @@ import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../../../shared/widgets/glass_container.dart';
 
-class PostCard extends ConsumerWidget {
+class PostCard extends ConsumerStatefulWidget {
   final PostEntity post;
 
   const PostCard({super.key, required this.post});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authorState = ref.watch(userProfileProvider(post.authorUid));
+  ConsumerState<PostCard> createState() => _PostCardState();
+}
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
+class _PostCardState extends ConsumerState<PostCard> {
+  bool _isExpanded = false;
+  int _currentImageIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final authorState = ref.watch(userProfileProvider(widget.post.authorUid));
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: GlassContainer(
+        blur: 15,
+        opacity: 0.7,
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.cyberMagenta.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(authorState),
-          _buildContent(),
-          if (post.imageUrls.isNotEmpty) _buildImageGallery(),
-          _buildActions(context, ref),
-        ],
-      ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(authorState, context),
+            _buildContent(),
+            if (widget.post.imageUrls.isNotEmpty) _buildImageGallery(),
+            _buildActions(context),
+          ],
+        ),
+      )
+          .animate()
+          .fadeIn(duration: 400.ms)
+          .slideY(begin: 0.1, duration: 400.ms, curve: Curves.easeOutQuad),
     );
   }
 
-  Widget _buildHeader(AsyncValue authorState) {
+  Widget _buildHeader(AsyncValue authorState, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           authorState.when(
             data: (user) => PUAvatar(
-              radius: 20,
+              radius: 24,
               imageUrl: user?.profileImageUrl,
               initials: user?.name.isNotEmpty == true ? user!.name[0] : '?',
             ),
             loading: () => Shimmer.fromColors(
-              baseColor: Colors.grey[200]!,
-              highlightColor: Colors.grey[50]!,
-              child: const CircleAvatar(radius: 20),
-            ),
-            error: (_, __) => const PUAvatar(radius: 20, initials: '?'),
+                baseColor: Colors.grey[200]!,
+                highlightColor: Colors.grey[50]!,
+                child: const CircleAvatar(radius: 24)),
+            error: (_, __) => const PUAvatar(radius: 24, initials: '?'),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -68,19 +82,41 @@ class PostCard extends ConsumerWidget {
               data: (user) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    user?.name ?? 'User',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: AppColors.textPrimary),
+                  Row(
+                    children: [
+                      Text(
+                        user?.name ?? 'User',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: AppColors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(4)),
+                        child: const Text('1st',
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textSecondary)),
+                      ),
+                    ],
                   ),
                   Text(
-                    '${user?.headline ?? user?.activityStatus.name ?? 'Member'} • ${timeago.format(post.timestamp)}',
+                    user?.headline ?? user?.activityStatus.name ?? 'Member',
                     style: const TextStyle(
                         color: AppColors.textSecondary, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    timeago.format(widget.post.timestamp),
+                    style: const TextStyle(
+                        color: AppColors.textHint, fontSize: 11),
                   ),
                 ],
               ),
@@ -98,54 +134,148 @@ class PostCard extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.more_horiz, color: AppColors.textHint),
-            onPressed: () {},
+            onPressed: () => _showContextMenu(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
     );
   }
 
+  void _showContextMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            ListTile(
+                leading: const Icon(Icons.bookmark_border),
+                title: const Text('Save Post'),
+                onTap: () => Navigator.pop(ctx)),
+            ListTile(
+                leading: const Icon(Icons.copy),
+                title: const Text('Copy Link'),
+                onTap: () => Navigator.pop(ctx)),
+            ListTile(
+                leading: const Icon(Icons.visibility_off_outlined),
+                title: const Text('Hide Post'),
+                onTap: () => Navigator.pop(ctx)),
+            ListTile(
+                leading:
+                    const Icon(Icons.report_outlined, color: AppColors.error),
+                title: const Text('Report Post',
+                    style: TextStyle(color: AppColors.error)),
+                onTap: () => Navigator.pop(ctx)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildContent() {
+    final content = widget.post.content;
+    final isLong = content.length > 150;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        post.content,
-        style: const TextStyle(
-            fontSize: 15,
-            color: AppColors.textPrimary,
-            height: 1.5,
-            fontWeight: FontWeight.w400),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _isExpanded || !isLong
+                ? content
+                : '${content.substring(0, 150)}...',
+            style: const TextStyle(
+                fontSize: 14, color: AppColors.textPrimary, height: 1.5),
+          ),
+          if (isLong)
+            GestureDetector(
+              onTap: () => setState(() => _isExpanded = !_isExpanded),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  _isExpanded ? 'Show less' : 'See more',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
   Widget _buildImageGallery() {
     return Container(
-      margin: const EdgeInsets.only(top: 8),
+      margin: const EdgeInsets.only(top: 12),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      constraints: const BoxConstraints(maxHeight: 400),
+          color: AppColors.background, borderRadius: BorderRadius.circular(0)),
+      constraints: const BoxConstraints(maxHeight: 350),
       width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          post.imageUrls.first,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Center(
-              child: Icon(Icons.image_not_supported_outlined,
-                  color: AppColors.textHint)),
-        ),
+      child: Stack(
+        children: [
+          PageView.builder(
+            itemCount: widget.post.imageUrls.length,
+            onPageChanged: (idx) => setState(() => _currentImageIndex = idx),
+            itemBuilder: (context, index) {
+              return Image.network(
+                widget.post.imageUrls[index],
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Center(
+                    child: Icon(Icons.image_not_supported_outlined,
+                        color: AppColors.textHint)),
+              );
+            },
+          ),
+          if (widget.post.imageUrls.length > 1)
+            Positioned(
+              bottom: 12,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  widget.post.imageUrls.length,
+                  (index) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: _currentImageIndex == index ? 8 : 6,
+                    height: _currentImageIndex == index ? 8 : 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentImageIndex == index
+                          ? AppColors.primary
+                          : Colors.white.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildActions(BuildContext context, WidgetRef ref) {
+  Widget _buildActions(BuildContext context) {
     final currentUser = ref.watch(authStateProvider).value;
-    final isLiked = post.reactions['like']?.contains(currentUser?.uid) ?? false;
-    final likesCount = post.reactions['like']?.length ?? 0;
-    final commentsCount = post.commentsCount;
+    final isLiked =
+        widget.post.reactions['like']?.contains(currentUser?.uid) ?? false;
+    final likesCount = widget.post.reactions['like']?.length ?? 0;
+    final commentsCount = widget.post.commentsCount;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -153,16 +283,21 @@ class PostCard extends ConsumerWidget {
         children: [
           if (likesCount > 0 || commentsCount > 0)
             Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Row(
                 children: [
                   if (likesCount > 0) ...[
-                    const Icon(Icons.favorite,
-                        size: 14, color: AppColors.primary),
-                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                          color: AppColors.primary, shape: BoxShape.circle),
+                      child: const Icon(Icons.thumb_up,
+                          size: 10, color: Colors.white),
+                    ),
+                    const SizedBox(width: 6),
                     Text('$likesCount',
                         style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.bold)),
                   ],
@@ -170,7 +305,11 @@ class PostCard extends ConsumerWidget {
                   if (commentsCount > 0)
                     Text('$commentsCount comments',
                         style: const TextStyle(
-                            fontSize: 13, color: AppColors.textSecondary)),
+                            fontSize: 12, color: AppColors.textSecondary)),
+                  const SizedBox(width: 8),
+                  const Text('· 4 shares',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -179,19 +318,24 @@ class PostCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _ActionButton(
-                icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                icon: isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
                 label: 'Like',
                 color: isLiked ? AppColors.primary : AppColors.textSecondary,
-                onTap: () => _likePost(ref),
+                onTap: () => _likePost(),
               ),
               _ActionButton(
                 icon: Icons.chat_bubble_outline,
                 label: 'Comment',
-                onTap: () => _showComments(context, ref),
+                onTap: () => _showComments(context),
               ),
               _ActionButton(
-                icon: Icons.share_outlined,
-                label: 'Share',
+                icon: Icons.repeat_rounded,
+                label: 'Repost',
+                onTap: () {},
+              ),
+              _ActionButton(
+                icon: Icons.send_outlined,
+                label: 'Send',
                 onTap: () {},
               ),
             ],
@@ -201,11 +345,13 @@ class PostCard extends ConsumerWidget {
     );
   }
 
-  void _likePost(WidgetRef ref) {
-    ref.read(postControllerProvider.notifier).reactToPost(post.postId, 'like');
+  void _likePost() {
+    ref
+        .read(postControllerProvider.notifier)
+        .reactToPost(widget.post.postId, 'like');
   }
 
-  void _showComments(BuildContext context, WidgetRef ref) {
+  void _showComments(BuildContext context) {
     final commentCtrl = TextEditingController();
     final profileState = ref.watch(profileControllerProvider);
     final user = profileState.value;
@@ -266,9 +412,8 @@ class PostCard extends ConsumerWidget {
                   icon: const Icon(Icons.send, color: AppColors.primary),
                   onPressed: () async {
                     if (commentCtrl.text.trim().isEmpty) return;
-                    await ref
-                        .read(postControllerProvider.notifier)
-                        .addComment(post.postId, commentCtrl.text.trim());
+                    await ref.read(postControllerProvider.notifier).addComment(
+                        widget.post.postId, commentCtrl.text.trim());
                     if (ctx.mounted) Navigator.pop(ctx);
                   },
                 ),

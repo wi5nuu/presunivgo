@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,12 +26,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Check if user is already signed in
     final user = FirebaseAuth.instance.currentUser;
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
     if (user != null) {
       // User is logged in — go directly to home
-      context.go('/home');
+      context.go('/dashboard');
+    } else if (hasSeenOnboarding) {
+      // Not logged in, but has seen onboarding
+      context.go('/login');
     } else {
-      // No logged-in user — go through onboarding/login
+      // No logged-in user and hasn't seen onboarding
       context.go('/onboarding');
     }
   }

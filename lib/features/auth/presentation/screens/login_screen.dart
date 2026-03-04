@@ -18,6 +18,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _rememberMe = false;
+  bool _isValidDomain = false;
+  bool _isFormValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+  }
+
+  void _validateForm() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    final validDomain = email.endsWith('@student.president.ac.id') ||
+        email.endsWith('@president.ac.id');
+
+    setState(() {
+      _isValidDomain = validDomain;
+      _isFormValid = validDomain && password.isNotEmpty;
+    });
+  }
 
   @override
   void dispose() {
@@ -45,7 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               final user = ref.read(authRepositoryProvider).currentUser;
               if (user != null) {
                 if (user.emailVerified) {
-                  context.go('/home');
+                  context.go('/dashboard');
                 } else {
                   context.go('/verify-email');
                 }
@@ -75,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [AppColors.primary, AppColors.secondary],
+                        colors: [AppColors.navy, AppColors.primary],
                       ),
                     ),
                   ),
@@ -159,6 +182,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           label: 'Email Address',
                           hintText: 'user@student.president.ac.id',
                           keyboardType: TextInputType.emailAddress,
+                          suffixIcon: _isValidDomain
+                              ? const Icon(Icons.check_circle,
+                                  color: AppColors.success)
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         PUTextField(
@@ -179,12 +206,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(height: 8),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: Checkbox(
+                                    value: _rememberMe,
+                                    onChanged: (val) => setState(
+                                        () => _rememberMe = val ?? false),
+                                    activeColor: AppColors.primary,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4)),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Remember me',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.textSecondary)),
+                              ],
+                            ),
                             TextButton(
                               onPressed: () {},
                               child: const Text('Forgot Password?',
-                                  style: TextStyle(fontSize: 13)),
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary)),
                             ),
                           ],
                         ),
@@ -192,14 +243,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         PUButton(
                           text: 'Login',
                           isLoading: authState.isLoading,
-                          onPressed: () async {
-                            await ref
-                                .read(authControllerProvider.notifier)
-                                .login(
-                                  _emailController.text.trim(),
-                                  _passwordController.text.trim(),
-                                );
-                          },
+                          onPressed: _isFormValid
+                              ? () async {
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .login(
+                                        _emailController.text.trim(),
+                                        _passwordController.text.trim(),
+                                      );
+                                }
+                              : null,
                         ),
                         const SizedBox(height: 24),
                         const Row(

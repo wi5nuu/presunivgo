@@ -10,12 +10,39 @@ import '../../../post/presentation/providers/post_provider.dart';
 import '../../../../shared/widgets/pu_shimmer.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
+import '../../../../shared/widgets/glass_container.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(feedLimitProvider.notifier).state += 10;
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider);
     final profileState = ref.watch(profileControllerProvider);
     final user = profileState.value;
@@ -23,62 +50,87 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // Premium Header with Search
           SliverAppBar(
-            expandedHeight: 120,
+            expandedHeight: 140,
             floating: true,
             pinned: true,
             backgroundColor: AppColors.primary,
             elevation: 0,
             automaticallyImplyLeading: false,
+            stretch: true,
             flexibleSpace: FlexibleSpaceBar(
+              stretchModes: const [
+                StretchMode.blurBackground,
+                StretchMode.zoomBackground
+              ],
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.navy,
+                      AppColors.primary,
+                      AppColors.secondary
+                    ],
                   ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -50,
+                      top: -50,
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             title: Row(
               children: [
-                PUAvatar(
-                  radius: 18,
-                  imageUrl: user?.profileImageUrl,
-                  initials: user?.name.isNotEmpty == true ? user!.name[0] : '?',
+                Hero(
+                  tag: 'profile_avatar',
+                  child: PUAvatar(
+                    radius: 20,
+                    imageUrl: user?.profileImageUrl,
+                    initials:
+                        user?.name.isNotEmpty == true ? user!.name[0] : '?',
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => context.push('/search'),
                     child: Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      height: 45,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(15),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.2)),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.search,
-                              color: AppColors.textSecondary, size: 20),
+                          Icon(Icons.search_rounded,
+                              color: Colors.white70, size: 20),
                           SizedBox(width: 8),
                           Text(
                             'Search campus...',
                             style: TextStyle(
-                              color: AppColors.textHint,
+                              color: Colors.white70,
                               fontSize: 14,
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -86,11 +138,11 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline,
+                  icon: const Icon(Icons.notifications_none_rounded,
                       color: Colors.white),
-                  onPressed: () => context.push('/chat'),
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -155,10 +207,10 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreatePost(context),
         backgroundColor: AppColors.primary,
-        elevation: 4,
+        elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ).animate().scale(delay: 500.ms, curve: Curves.easeOutBack),
+      ),
     );
   }
 
@@ -186,19 +238,19 @@ class CreatePostPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassContainer(
+      blur: 15,
+      opacity: 0.7,
+      color: Colors.white,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.cyberMagenta.withOpacity(0.05),
+          blurRadius: 15,
+          offset: const Offset(0, 4),
+        ),
+      ],
       child: Row(
         children: [
           PUAvatar(

@@ -33,7 +33,15 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.navy, AppColors.primary],
+            ),
+          ),
+        ),
         elevation: 0,
         title: const Text('Job Marketplace',
             style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),

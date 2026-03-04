@@ -26,11 +26,19 @@ class ChatListScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.navy, AppColors.primary],
+            ),
+          ),
+        ),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new,
-              size: 20, color: AppColors.primary),
+              size: 20, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Messages',
@@ -72,22 +80,37 @@ class ChatListScreen extends ConsumerWidget {
 
   Widget _buildSearchBox() {
     return Container(
-      color: AppColors.primary,
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search conversations...',
-          hintStyle: const TextStyle(color: Colors.white70),
-          prefixIcon: const Icon(Icons.search, color: Colors.white70),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.15),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.primary, AppColors.background],
+          stops: [0.0, 1.0],
         ),
-        style: const TextStyle(color: Colors.white),
+      ),
+      child: Container(
+        height: 45,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const TextField(
+          decoration: InputDecoration(
+            hintText: 'Search conversations...',
+            hintStyle: TextStyle(color: AppColors.textHint),
+            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textHint),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
       ),
     );
   }

@@ -1,15 +1,12 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/story_entity.dart';
 import '../../domain/repositories/story_repository.dart';
 
 class StoryRepositoryImpl implements StoryRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
 
-  StoryRepositoryImpl(this._firestore, this._storage);
+  StoryRepositoryImpl(this._firestore, _);
 
   @override
   Stream<List<StoryEntity>> getStories() {
@@ -26,13 +23,9 @@ class StoryRepositoryImpl implements StoryRepository {
   }
 
   @override
-  Future<void> uploadStory(File imageFile, String authorUid, String authorName,
+  Future<void> uploadStory(String imageUrl, String authorUid, String authorName,
       String? authorProfileImage) async {
     final storyId = const Uuid().v4();
-    final storageRef = _storage.ref().child('stories/$storyId.jpg');
-
-    final uploadTask = await storageRef.putFile(imageFile);
-    final imageUrl = await uploadTask.ref.getDownloadURL();
 
     final story = StoryModel(
       id: storyId,

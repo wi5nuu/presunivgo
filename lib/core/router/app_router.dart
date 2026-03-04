@@ -9,10 +9,12 @@ import 'package:presunivgo/features/auth/presentation/screens/email_verify_scree
 import 'package:presunivgo/features/home/presentation/screens/home_screen.dart';
 import 'package:presunivgo/features/profile/presentation/screens/profile_screen.dart';
 import 'package:presunivgo/features/jobs/presentation/screens/jobs_screen.dart';
+import 'package:presunivgo/features/jobs/presentation/screens/job_detail_screen.dart';
 import 'package:presunivgo/shared/screens/main_screen.dart';
 import 'package:presunivgo/features/chat/presentation/screens/chat_list_screen.dart';
 import 'package:presunivgo/features/chat/presentation/screens/chat_detail_screen.dart';
 import 'package:presunivgo/features/alumni/presentation/screens/alumni_directory_screen.dart';
+import 'package:presunivgo/features/alumni/presentation/screens/network_screen.dart';
 import 'package:presunivgo/features/clubs/presentation/screens/club_list_screen.dart';
 import 'package:presunivgo/features/clubs/presentation/screens/club_detail_screen.dart';
 import 'package:presunivgo/features/ai_assistant/presentation/screens/mentor_bot_screen.dart';
@@ -21,6 +23,7 @@ import 'package:presunivgo/features/dashboard/presentation/screens/dashboard_scr
 import 'package:presunivgo/features/ai_assistant/presentation/screens/ai_cv_review_screen.dart';
 import 'package:presunivgo/features/ai_assistant/presentation/screens/ai_cover_letter_screen.dart';
 import 'package:presunivgo/features/ai_assistant/presentation/screens/ai_career_roadmap_screen.dart';
+import 'package:presunivgo/features/auth/presentation/screens/admin_dashboard_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -73,6 +76,10 @@ GoRouter appRouter(AppRouterRef ref) {
             builder: (context, state) => const ProfileScreen(),
           ),
           GoRoute(
+            path: '/network',
+            builder: (context, state) => const NetworkScreen(),
+          ),
+          GoRoute(
             path: '/alumni',
             builder: (context, state) => const AlumniDirectoryScreen(),
           ),
@@ -109,8 +116,21 @@ GoRouter appRouter(AppRouterRef ref) {
             ClubDetailScreen(clubId: state.pathParameters['clubId']!),
       ),
       GoRoute(
+        path: '/jobs/:jobId',
+        builder: (context, state) {
+          // We pass the job via 'extra' from job_card
+          final job = state.extra as dynamic;
+          if (job == null) return const JobMarketplaceScreen();
+          return JobDetailScreen(job: job);
+        },
+      ),
+      GoRoute(
         path: '/mentor-bot',
         builder: (context, state) => const MentorBotScreen(),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminDashboardScreen(),
       ),
     ],
   );

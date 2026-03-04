@@ -33,6 +33,9 @@ class ChatController extends _$ChatController {
     final user = ref.read(authStateProvider).value;
     if (user == null) return;
 
+    // Clear typing indicator when message is sent
+    await setTyping(chatId, false);
+
     final message = MessageEntity(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderUid: user.uid,
@@ -43,4 +46,35 @@ class ChatController extends _$ChatController {
 
     await ref.read(chatRepositoryProvider).sendMessage(chatId, message);
   }
+
+  /// Toggle the typing indicator for the current user in a given chat.
+  Future<void> setTyping(String chatId, bool isTyping) async {
+    final user = ref.read(authStateProvider).value;
+    if (user == null) return;
+    final doc = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('typing')
+        .doc(user.uid);
+    if (isTyping) {
+      await doc.set({'uid': user.uid, 'at': FieldValue.serverTimestamp()});
+    } else {
+      await doc.delete();
+    }
+  }
 }
+
+/// Stream of UIDs currently typing in [chatId] (excluding self).
+final typingUsersProvider =
+    StreamProvider.family<List<String>, String>((ref, chatId) {
+  final currentUid = ref.watch(authStateProvider).value?.uid;
+  return FirebaseFirestore.instance
+      .collection('chats')
+      .doc(chatId)
+      .collection('typing')
+      .snapshots()
+      .map((snap) => snap.docs
+          .map((d) => d['uid'] as String)
+          .where((uid) => uid != currentUid)
+          .toList());
+});

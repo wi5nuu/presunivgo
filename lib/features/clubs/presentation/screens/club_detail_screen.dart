@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:presunivgo/core/constants/app_colors.dart';
+import 'package:presunivgo/shared/widgets/pu_avatar.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final String clubId;
@@ -70,15 +72,55 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
   }
 
   Widget _buildDrawerHeader() {
-    return const UserAccountsDrawerHeader(
-      decoration: BoxDecoration(color: AppColors.primary),
-      currentAccountPicture: CircleAvatar(
-        backgroundColor: Colors.white,
-        child: Icon(Icons.groups, color: AppColors.primary),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 60, 16, 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.navy, AppColors.primary],
+        ),
       ),
-      accountName:
-          Text('IT Club', style: TextStyle(fontWeight: FontWeight.bold)),
-      accountEmail: Text('Verified Community'),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const PUAvatar(
+              radius: 30,
+              initials: 'IT',
+              backgroundColor: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'IT Club',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  'Verified Community',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -161,11 +203,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
 
   Widget _buildMessageItem(int index) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(radius: 18, backgroundColor: AppColors.border),
+          PUAvatar(
+            radius: 18,
+            initials: index % 3 == 0 ? 'AD' : 'ST',
+            backgroundColor:
+                index % 3 == 0 ? AppColors.secondary : AppColors.royalBlue,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -173,26 +220,56 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
               children: [
                 Row(
                   children: [
-                    const Text('Student Name',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text(
+                      index % 3 == 0 ? 'Admin' : 'Student Name',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: index % 3 == 0
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Text('12:4${index % 10} PM',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppColors.textHint)),
+                    Text(
+                      '12:4${index % 10} PM',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'This is a sample message in the club channel. We are discussing the upcoming hackathon!',
-                  style: TextStyle(fontSize: 14),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topRight: const Radius.circular(16),
+                      bottomLeft: const Radius.circular(16),
+                      bottomRight: const Radius.circular(16),
+                    ),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'This is a premium club message. We focus on excellence and professional growth!',
+                    style: TextStyle(fontSize: 14, height: 1.4),
+                  ),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: (index * 100).ms).slideX(begin: -0.05);
   }
 
   Widget _buildMessageInput() {

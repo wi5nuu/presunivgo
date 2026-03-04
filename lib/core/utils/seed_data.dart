@@ -41,7 +41,7 @@ class SeedDataPopulator {
     await _firestore.collection('posts').add({
       'author_uid': 'student1',
       'content':
-          'Just finished the PU Connect v2.0 upgrade! 🚀 #Flutter #PresidentUniversity',
+          'Just finished the PresUnivGo v2.0 upgrade! 🚀 #Flutter #PresidentUniversity',
       'timestamp': FieldValue.serverTimestamp(),
       'reactions': {'like': []},
     });

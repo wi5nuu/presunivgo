@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/pu_button.dart';
 import '../providers/post_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../shared/widgets/pu_avatar.dart';
 
 class CreatePostModal extends ConsumerStatefulWidget {
   const CreatePostModal({super.key});
@@ -16,6 +19,8 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
   final _textController = TextEditingController();
   String _visibility = 'Public';
   final List<String> _visibilities = ['Public', 'Connections', 'Private'];
+  File? _selectedImage;
+  bool _isUploading = false;
 
   @override
   void dispose() {
@@ -23,26 +28,56 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _handlePost() async {
+    if (_textController.text.trim().isEmpty && _selectedImage == null) return;
+
+    setState(() => _isUploading = true);
+
+    try {
+      List<String> imageUrls = [];
+      if (_selectedImage != null) {
+        final url = await ref
+            .read(postControllerProvider.notifier)
+            .uploadMedia(_selectedImage!);
+        imageUrls.add(url);
+      }
+
+      await ref.read(postControllerProvider.notifier).createPost(
+            _textController.text.trim(),
+            imageUrls,
+            _visibility.toLowerCase(),
+          );
+
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final postState = ref.watch(postControllerProvider);
-
-    ref.listen(postControllerProvider, (prev, next) {
-      if (next.hasValue && !next.isLoading && prev?.isLoading == true) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post shared successfully!')),
-        );
-      }
-      if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${next.error}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    });
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
@@ -64,30 +99,56 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
           _buildVisibilitySelector(),
           const SizedBox(height: 16),
           Expanded(
-            child: TextField(
-              controller: _textController,
-              maxLines: null,
-              decoration: const InputDecoration(
-                hintText: "What's on your mind?",
-                border: InputBorder.none,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _textController,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      hintText: "What's on your mind?",
+                      border: InputBorder.none,
+                    ),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  if (_selectedImage != null)
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(_selectedImage!,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedImage = null),
+                            child: const CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.black54,
+                              child: Icon(Icons.close,
+                                  size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
-              style: const TextStyle(fontSize: 18),
             ),
           ),
           _buildAttachmentToolbar(),
           const SizedBox(height: 16),
           PUButton(
             text: 'Post',
-            isLoading: postState.isLoading,
-            onPressed: () {
-              if (_textController.text.trim().isNotEmpty) {
-                ref.read(postControllerProvider.notifier).createPost(
-                      _textController.text.trim(),
-                      [], // Image URLs placeholder
-                      _visibility.toLowerCase(),
-                    );
-              }
-            },
+            isLoading: _isUploading || postState.isLoading,
+            onPressed: (_textController.text.trim().isNotEmpty ||
+                    _selectedImage != null)
+                ? _handlePost
+                : null,
           ),
         ],
       ),
@@ -120,7 +181,11 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
 
     return Row(
       children: [
-        const CircleAvatar(radius: 20, backgroundColor: AppColors.border),
+        PUAvatar(
+          radius: 20,
+          imageUrl: user?.profileImageUrl,
+          initials: user?.name.isNotEmpty == true ? user!.name[0] : '?',
+        ),
         const SizedBox(width: 12),
         Text(
           user?.name ?? 'Your Name',
@@ -156,7 +221,7 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
       children: [
         IconButton(
             icon: const Icon(Icons.image_outlined, color: AppColors.royalBlue),
-            onPressed: () {}),
+            onPressed: _pickImage),
         IconButton(
             icon: const Icon(Icons.description_outlined,
                 color: AppColors.textSecondary),

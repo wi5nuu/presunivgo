@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -6,6 +7,7 @@ import '../../domain/entities/chat_entity.dart';
 import '../providers/chat_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
+import '../../../../shared/widgets/typing_indicator.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatDetailScreen extends ConsumerStatefulWidget {
@@ -20,9 +22,20 @@ class ChatDetailScreen extends ConsumerStatefulWidget {
 class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  Timer? _typingTimer;
+
+  void _onTextChanged() {
+    ref.read(chatControllerProvider.notifier).setTyping(widget.chatId, true);
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      ref.read(chatControllerProvider.notifier).setTyping(widget.chatId, false);
+    });
+  }
 
   @override
   void dispose() {
+    _typingTimer?.cancel();
+    ref.read(chatControllerProvider.notifier).setTyping(widget.chatId, false);
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -120,6 +133,16 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               error: (err, __) => Center(child: Text('Error: $err')),
             ),
           ),
+          // Typing indicator
+          Consumer(
+            builder: (_, ref, __) {
+              final typingAsync = ref.watch(typingUsersProvider(widget.chatId));
+              final typing = typingAsync.valueOrNull ?? [];
+              return typing.isNotEmpty
+                  ? const TypingIndicator()
+                  : const SizedBox.shrink();
+            },
+          ),
           _buildInputBar(),
         ],
       ),
@@ -156,6 +179,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             Expanded(
               child: TextField(
                 controller: _messageController,
+                onChanged: (_) => _onTextChanged(),
                 onSubmitted: (_) => _handleSend(),
                 decoration: InputDecoration(
                   hintText: 'Type a message...',

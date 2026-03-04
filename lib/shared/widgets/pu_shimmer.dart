@@ -31,32 +31,32 @@ class PUShimmer extends StatelessWidget {
   }
 
   static Widget card() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const PUShimmer(
+              PUShimmer(
                   width: 40,
                   height: 40,
                   borderRadius: BorderRadius.all(Radius.circular(20))),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   PUShimmer(width: 120, height: 12),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   PUShimmer(width: 80, height: 10),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const PUShimmer(height: 100),
-          const SizedBox(height: 12),
-          const PUShimmer(width: 150, height: 12),
+          SizedBox(height: 16),
+          PUShimmer(height: 100),
+          SizedBox(height: 12),
+          PUShimmer(width: 150, height: 12),
         ],
       ),
     );

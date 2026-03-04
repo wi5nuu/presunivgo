@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -8,32 +10,104 @@ import '../../../../shared/widgets/pu_avatar.dart';
 import '../providers/profile_provider.dart';
 import '../../../post/presentation/providers/post_provider.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  Future<void> _pickAndUploadImage(
+      BuildContext context, WidgetRef ref, bool isProfile) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (image != null) {
+      if (isProfile) {
+        await ref
+            .read(profileControllerProvider.notifier)
+            .uploadProfileImage(File(image.path));
+      } else {
+        await ref
+            .read(profileControllerProvider.notifier)
+            .uploadBannerImage(File(image.path));
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${isProfile ? 'Profile' : 'Banner'} image updated!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
+  }
+
+  List<String> _sectionOrder = [
+    'about',
+    'experience',
+    'education',
+    'skills',
+    'projects',
+    'certs',
+    'posts'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileState = ref.watch(profileControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: profileState.when(
-        data: (user) => user == null
-            ? Center(
+      body: Stack(
+        children: [
+          profileState.when(
+            data: (user) => user == null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Please login to view profile'),
+                        TextButton(
+                          onPressed: () => context.go('/login'),
+                          child: const Text('Go to Login'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _buildProfileContent(context, ref, user),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text('Error: $err')),
+          ),
+          if (profileState.isLoading)
+            Container(
+              color: Colors.black26,
+              child: const Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Please login to view profile'),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text('Go to Login'),
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 16),
+                    Text(
+                      'Uploading...',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-              )
-            : _buildProfileContent(context, ref, user),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -56,68 +130,158 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 _buildAnalyticsWidget(),
                 const SizedBox(height: 16),
-                _buildAboutSection(user),
-                const SizedBox(height: 16),
-                _buildExperienceSection(context, ref, user),
-                const SizedBox(height: 16),
-                _buildEducationSection(context, ref, user),
-                const SizedBox(height: 16),
-                _buildSkillsSection(context, ref, user),
-                const SizedBox(height: 16),
-                // My Posts section
-                if (myPosts.isNotEmpty) ...[
-                  const Text('My Posts',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ...myPosts.map((post) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: AppColors.border),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(post.content),
-                              const SizedBox(height: 4),
-                              Text(
-                                post.timestamp
-                                    .toLocal()
-                                    .toString()
-                                    .substring(0, 16),
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
-                ] else ...[
-                  const Text('My Posts',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Center(
-                          child: Text('No posts yet',
-                              style:
-                                  TextStyle(color: AppColors.textSecondary))),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Profile Sections',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    TextButton.icon(
+                      icon: const Icon(Icons.drag_indicator_rounded, size: 18),
+                      label: const Text('Reorder'),
+                      onPressed: () => _showReorderDialog(context),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ..._buildOrderedSections(context, ref, user, myPosts),
                 const SizedBox(height: 100),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  List<Widget> _buildOrderedSections(BuildContext context, WidgetRef ref,
+      UserEntity user, List<dynamic> myPosts) {
+    final widgets = <Widget>[];
+    for (final key in _sectionOrder) {
+      if (key == 'about') {
+        widgets.add(_buildAboutSection(user));
+      } else if (key == 'experience') {
+        widgets.add(_buildExperienceSection(context, ref, user));
+      } else if (key == 'education') {
+        widgets.add(_buildEducationSection(context, ref, user));
+      } else if (key == 'skills') {
+        widgets.add(_buildSkillsSection(context, ref, user));
+      } else if (key == 'projects') {
+        widgets.add(_buildProjectsSection(context, ref, user));
+      } else if (key == 'certs') {
+        widgets.add(_buildCertsSection(context, ref, user));
+      } else if (key == 'posts') {
+        widgets.add(_buildPostsSection(myPosts));
+      }
+
+      widgets.add(const SizedBox(height: 16));
+    }
+    return widgets;
+  }
+
+  Widget _buildPostsSection(List<dynamic> myPosts) {
+    return _buildSectionContainer(
+      title: 'My Posts',
+      child: Column(
+        children: myPosts.isEmpty
+            ? [
+                const Card(
+                    child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(
+                            child: Text('No posts yet',
+                                style: TextStyle(
+                                    color: AppColors.textSecondary)))))
+              ]
+            : myPosts
+                .map((post) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: AppColors.border)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(post.content),
+                            const SizedBox(height: 4),
+                            Text(
+                                post.timestamp
+                                    .toLocal()
+                                    .toString()
+                                    .substring(0, 16),
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ),
+                    ))
+                .toList(),
+      ),
+    );
+  }
+
+  void _showReorderDialog(BuildContext context) {
+    final List<String> tempOrder = List.from(_sectionOrder);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => StatefulBuilder(builder: (context, setModalState) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Drag to Reorder Sections',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ReorderableListView(
+                    onReorder: (oldIndex, newIndex) {
+                      setModalState(() {
+                        if (oldIndex < newIndex) newIndex -= 1;
+                        final item = tempOrder.removeAt(oldIndex);
+                        tempOrder.insert(newIndex, item);
+                      });
+                    },
+                    children: tempOrder.map((key) {
+                      String title = key[0].toUpperCase() + key.substring(1);
+                      return ListTile(
+                        key: ValueKey(key),
+                        leading: const Icon(Icons.drag_handle,
+                            color: AppColors.textHint),
+                        title: Text(title,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w500)),
+                        tileColor: Colors.white,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() => _sectionOrder = tempOrder);
+                    Navigator.pop(ctx);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50)),
+                  child: const Text('Save Order'),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -158,21 +322,46 @@ class ProfileScreen extends ConsumerWidget {
         background: Stack(
           children: [
             // Banner
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [AppColors.primary, AppColors.secondary],
+            GestureDetector(
+              onTap: () => _pickAndUploadImage(context, ref, false),
+              child: Container(
+                height: 180,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [AppColors.primary, AppColors.secondary],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    if (user.bannerImageUrl != null)
+                      Positioned.fill(
+                        child: Image.network(user.bannerImageUrl!,
+                            fit: BoxFit.cover),
+                      ),
+                    if (user.bannerImageUrl == null)
+                      const Center(
+                        child: Icon(Icons.star_border_rounded,
+                            color: Colors.white30, size: 80),
+                      ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(Icons.camera_alt,
+                            color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: user.bannerImageUrl != null
-                  ? Image.network(user.bannerImageUrl!, fit: BoxFit.cover)
-                  : const Center(
-                      child: Icon(Icons.star_border_rounded,
-                          color: Colors.white30, size: 80)),
             ),
             // Profile Info
             Positioned(
@@ -185,17 +374,63 @@ class ProfileScreen extends ConsumerWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: PUAvatar(
-                          radius: 50,
-                          imageUrl: user.profileImageUrl,
-                          initials: user.name.isNotEmpty ? user.name[0] : '?',
-                          borderColor: Colors.white,
+                      GestureDetector(
+                        onTap: () => _pickAndUploadImage(context, ref, true),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Stack(
+                            children: [
+                              PUAvatar(
+                                radius: 50,
+                                imageUrl: user.profileImageUrl,
+                                initials:
+                                    user.name.isNotEmpty ? user.name[0] : '?',
+                                borderColor: user.isOpenToWork
+                                    ? AppColors.success
+                                    : Colors.white,
+                              ),
+                              if (user.isOpenToWork)
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.success,
+                                      borderRadius: BorderRadius.vertical(
+                                          bottom: Radius.circular(50)),
+                                    ),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: const Text(
+                                      '#OPENTOWORK',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.camera_alt,
+                                      color: Colors.white, size: 14),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -308,58 +543,76 @@ class ProfileScreen extends ConsumerWidget {
     final bioCtrl = TextEditingController(text: user.bio ?? '');
     final locationCtrl = TextEditingController(text: user.location ?? '');
 
+    bool openToWork = user.isOpenToWork;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit Profile'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Full Name'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: headlineCtrl,
-                decoration: const InputDecoration(labelText: 'Headline'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: bioCtrl,
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Bio'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: locationCtrl,
-                decoration: const InputDecoration(labelText: 'Location'),
-              ),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setLocalState) => AlertDialog(
+          title: const Text('Edit Profile'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: headlineCtrl,
+                  decoration: const InputDecoration(labelText: 'Headline'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: bioCtrl,
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: 'Bio'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: locationCtrl,
+                  decoration: const InputDecoration(labelText: 'Location'),
+                ),
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  title: const Text('Open to Work',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text(
+                      'Add the #OPENTOWORK badge to your profile',
+                      style: TextStyle(fontSize: 12)),
+                  value: openToWork,
+                  activeColor: AppColors.success,
+                  onChanged: (val) => setLocalState(() => openToWork = val),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              final updated = user.copyWith(
-                name: nameCtrl.text.trim(),
-                headline: headlineCtrl.text.trim(),
-                bio: bioCtrl.text.trim(),
-                location: locationCtrl.text.trim(),
-              );
-              await ref
-                  .read(profileControllerProvider.notifier)
-                  .updateProfile(updated);
-              if (context.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () async {
+                final updated = user.copyWith(
+                  name: nameCtrl.text.trim(),
+                  headline: headlineCtrl.text.trim(),
+                  bio: bioCtrl.text.trim(),
+                  location: locationCtrl.text.trim(),
+                  isOpenToWork: openToWork,
+                );
+                await ref
+                    .read(profileControllerProvider.notifier)
+                    .updateProfile(updated);
+                if (context.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ), // Closes AlertDialog
+      ), // Closes StatefulBuilder
+    ); // Closes showDialog
   }
 
   void _showAddExperienceDialog(
@@ -632,6 +885,55 @@ class ProfileScreen extends ConsumerWidget {
                                 user.copyWith(skills: updatedSkills));
                       },
                       deleteIconColor: AppColors.error,
+                    ))
+                .toList(),
+      ),
+    );
+  }
+
+  Widget _buildProjectsSection(
+      BuildContext context, WidgetRef ref, UserEntity user) {
+    return _buildSectionContainer(
+      title: 'Projects',
+      onAdd: () {
+        // Mock add project action, logic similar to others
+      },
+      child: Column(
+        children: user.projects.isEmpty
+            ? [
+                const Text('No projects added yet.',
+                    style: TextStyle(color: AppColors.textHint))
+              ]
+            : user.projects
+                .map((proj) => _ExperienceItem(
+                      title: proj['title'] ?? 'Title',
+                      company: proj['role'] ?? 'Role',
+                      duration: proj['duration'] ?? 'Duration',
+                      description: proj['description'],
+                    ))
+                .toList(),
+      ),
+    );
+  }
+
+  Widget _buildCertsSection(
+      BuildContext context, WidgetRef ref, UserEntity user) {
+    return _buildSectionContainer(
+      title: 'Certifications',
+      onAdd: () {
+        // Mock add cert action
+      },
+      child: Column(
+        children: user.certifications.isEmpty
+            ? [
+                const Text('No certifications added yet.',
+                    style: TextStyle(color: AppColors.textHint))
+              ]
+            : user.certifications
+                .map((cert) => _ExperienceItem(
+                      title: cert['name'] ?? 'Name',
+                      company: cert['issuer'] ?? 'Issuer',
+                      duration: cert['date'] ?? 'Date',
                     ))
                 .toList(),
       ),

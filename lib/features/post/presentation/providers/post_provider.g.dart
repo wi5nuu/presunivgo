@@ -21,7 +21,7 @@ final postRepositoryProvider = Provider<PostRepository>.internal(
 );
 
 typedef PostRepositoryRef = ProviderRef<PostRepository>;
-String _$feedHash() => r'7e459a1816532fe008bd3afd44356e0b726a9996';
+String _$feedHash() => r'12812ab6d5f215921b9ed476976d7a9bd915b716';
 
 /// See also [feed].
 @ProviderFor(feed)
@@ -35,7 +35,7 @@ final feedProvider = AutoDisposeStreamProvider<List<PostEntity>>.internal(
 );
 
 typedef FeedRef = AutoDisposeStreamProviderRef<List<PostEntity>>;
-String _$postControllerHash() => r'0be9bddd881f4e3a6d04415efcb6f80e1e2eabff';
+String _$postControllerHash() => r'95a38c764444ea6616a3f0178cc546a2045d5d4a';
 
 /// See also [PostController].
 @ProviderFor(PostController)

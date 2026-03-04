@@ -124,6 +124,8 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
             _buildActionChip(
                 'Career Roadmap', Icons.map_outlined, '/ai-career-roadmap'),
             _buildActionChip(
+                'Smart Post', Icons.auto_awesome_outlined, 'smart_post'),
+            _buildActionChip(
                 'Export Resume (PDF)', Icons.picture_as_pdf_outlined, 'export'),
           ],
         ),
@@ -140,6 +142,8 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
         onPressed: () {
           if (action == 'export') {
             _handleResumeExport();
+          } else if (action == 'smart_post') {
+            _handleSmartPostSuggestion();
           } else if (action != null) {
             context.push(action);
           }
@@ -148,7 +152,13 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
         side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
-    ).animate().fadeIn().scale(delay: 200.ms);
+    )
+        .animate(onPlay: (controller) => controller.repeat(reverse: true))
+        .shimmer(
+            duration: 2.seconds, color: AppColors.primary.withOpacity(0.05))
+        .animate()
+        .fadeIn()
+        .scale(delay: 200.ms);
   }
 
   void _handleResumeExport() async {
@@ -165,6 +175,30 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
           _messages.add(AIChatMessage(
             content:
                 "I've generated your professional resume PDF and sent it to your printing service! Reach out if you need adjustments.",
+            isUser: false,
+            timestamp: DateTime.now(),
+          ));
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _handleSmartPostSuggestion() async {
+    setState(() => _isLoading = true);
+    try {
+      // Simulate AI generating post topics based on profile
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        setState(() {
+          _messages.add(AIChatMessage(
+            content:
+                "Based on your profile in Information Technology, here are 3 trending topics you could post about:\n\n"
+                "1. 🚀 How AI is reshaping Web Development in 2026\n"
+                "2. 💡 My experience building a Student Networking platform\n"
+                "3. 🎓 Top skills every PresUniv IT student should master\n\n"
+                "Would you like me to help you draft one of these?",
             isUser: false,
             timestamp: DateTime.now(),
           ));
@@ -192,11 +226,16 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
               bottomLeft: Radius.circular(msg.isUser ? 20 : 4),
               bottomRight: Radius.circular(msg.isUser ? 4 : 20),
             ),
+            border: msg.isUser
+                ? null
+                : Border.all(color: AppColors.primary.withOpacity(0.1)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
+                color: msg.isUser
+                    ? AppColors.primary.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),

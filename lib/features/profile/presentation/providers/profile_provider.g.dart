@@ -170,7 +170,7 @@ class _UserProfileProviderElement
   String get uid => (origin as UserProfileProvider).uid;
 }
 
-String _$profileControllerHash() => r'9ed49e7daa8f995ff4c1c61afc24fa9e97ea01ea';
+String _$profileControllerHash() => r'86c1544345a602440deff22870f075c0ffcea8b3';
 
 /// See also [ProfileController].
 @ProviderFor(ProfileController)

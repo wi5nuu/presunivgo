@@ -9,10 +9,11 @@ class PostRepositoryImpl implements PostRepository {
   PostRepositoryImpl(this._firestore);
 
   @override
-  Stream<List<PostEntity>> getFeed() {
+  Stream<List<PostEntity>> getFeed({int limit = 10}) {
     return _firestore
         .collection('posts')
         .orderBy('timestamp', descending: true)
+        .limit(limit)
         .snapshots()
         .map((snapshot) {
       final List<PostEntity> posts = [];

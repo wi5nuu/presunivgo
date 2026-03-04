@@ -7,12 +7,15 @@ class PUAvatar extends StatelessWidget {
   final Color? borderColor;
   final String? initials;
 
+  final Color? backgroundColor;
+
   const PUAvatar({
     super.key,
     this.imageUrl,
     this.initials,
     this.radius = 20,
     this.borderColor,
+    this.backgroundColor,
   });
 
   @override
@@ -26,7 +29,7 @@ class PUAvatar extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: radius,
-        backgroundColor: AppColors.primary,
+        backgroundColor: backgroundColor ?? AppColors.primary,
         backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
             ? NetworkImage(imageUrl!)
             : null,
