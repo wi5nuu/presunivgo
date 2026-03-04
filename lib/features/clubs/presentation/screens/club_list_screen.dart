@@ -15,13 +15,19 @@ class ClubListScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
         title: const Text('Student Clubs',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () => _showCreateClubDialog(context, ref)),
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+            onPressed: () => _showCreateClubDialog(context, ref),
+          ),
         ],
       ),
       body: clubsState.when(
@@ -144,11 +150,12 @@ class ClubListScreen extends ConsumerWidget {
                         .read(clubControllerProvider.notifier)
                         .joinClub(club.clubId),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.royalBlue,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
-                      elevation: 0,
+                      elevation: 2,
+                      shadowColor: AppColors.primary.withOpacity(0.3),
                     ),
                     child: const Text('Join'),
                   ),

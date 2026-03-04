@@ -7,7 +7,6 @@ import '../../../post/presentation/widgets/post_card.dart';
 import '../widgets/story_bar.dart';
 import '../../../post/presentation/widgets/create_post_modal.dart';
 import '../../../post/presentation/providers/post_provider.dart';
-import '../../../../shared/widgets/glass_container.dart';
 import '../../../../shared/widgets/pu_shimmer.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
@@ -37,8 +36,8 @@ class HomeScreen extends ConsumerWidget {
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [AppColors.primary, AppColors.secondary],
                   ),
                 ),
@@ -59,18 +58,28 @@ class HomeScreen extends ConsumerWidget {
                       height: 40,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white30),
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.search, color: Colors.white, size: 18),
+                          Icon(Icons.search,
+                              color: AppColors.textSecondary, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            'Search PU Connect',
-                            style:
-                                TextStyle(color: Colors.white70, fontSize: 13),
+                            'Search campus...',
+                            style: TextStyle(
+                              color: AppColors.textHint,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ],
                       ),

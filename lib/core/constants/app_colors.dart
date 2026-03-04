@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Premium Theme (Dark Teal & Cream)
-  static const primary = Color(0xFF1B4242); // Deep Teal
-  static const secondary = Color(0xFF5C8374); // Muted Teal
-  static const accent = Color(0xFF9EC8B9); // Light Teal
-  static const background = Color(0xFFF8F9F9); // Off-white/Cream
-  static const surface = Color(0xFFFFFFFF); // Pure White
+  // Premium Theme (Vibrant Magenta & White)
+  // Based on high-fidelity social networking reference
+  static const primary = Color(0xFFE91E63); // Vibrant Magenta
+  static const primaryDark = Color(0xFFC2185B);
+  static const secondary = Color(0xFFF06292); // Lighter Pink
+  static const accent = Color(0xFFFF4081); // Bright Pink Accent
+
+  static const background = Color(0xFFF8F9FA); // Ultra-light neutral background
+  static const surface = Color(0xFFFFFFFF); // Pure White Cards
+  static const surfaceVariant =
+      Color(0xFFFFF1F5); // Very soft pink tint for highlights
 
   // Brand / Semantic
-  static const navy = Color(0xFF092635); // Deepest Navy/Teal
-  static const royalBlue = Color(0xFF1B4242); // Reusing Primary for consistency
-  static const accentBlue = Color(0xFF5C8374);
-  static const orange = Color(0xFFFF8911); // Logo Accent
+  static const navy = Color(0xFF880E4F); // Deep Magenta for solid headers
+  static const royalBlue = Color(0xFFE91E63); // Reusing Primary
+  static const orange = Color(0xFFFF8911); // Professional Warning/Action
 
-  static const success = Color(0xFF10B981);
-  static const warning = Color(0xFFF59E0B);
-  static const error = Color(0xFFEF4444);
-  static const info = Color(0xFF3B82F6);
+  static const success = Color(0xFF4CAF50);
+  static const warning = Color(0xFFFFC107);
+  static const error = Color(0xFFD32F2F);
+  static const info = Color(0xFF2196F3);
 
   // Neutral Scale
-  static const border = Color(0xFFE2E8F0);
-  static const surfaceVariant = Color(0xFFF1F5F9);
+  static const border = Color(0xFFEEEEEE);
+  static const divider = Color(0xFFF5F5F5);
 
-  // Text Scale
-  static const textPrimary = Color(0xFF0F172A);
-  static const textSecondary = Color(0xFF475569);
-  static const textHint = Color(0xFF94A3B8);
-  static const textOnDark = Color(0xFFF8FAFC);
+  // Text Scale (High Contrast for Professor Review)
+  static const textPrimary = Color(0xFF1A1A1A); // Almost Black
+  static const textSecondary = Color(0xFF616161); // Dark Grey
+  static const textHint = Color(0xFF9E9E9E); // Medium Grey
+  static const textOnDark = Color(0xFFFFFFFF); // Pure White on Pink
+
+  // Gradients
+  static const primaryGradient = [Color(0xFFE91E63), Color(0xFFF06292)];
+  static const darkGradient = [Color(0xFF880E4F), Color(0xFFC2185B)];
 }

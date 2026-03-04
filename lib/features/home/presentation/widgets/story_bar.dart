@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/story_provider.dart';
 import '../../domain/entities/story_entity.dart';

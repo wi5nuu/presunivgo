@@ -71,7 +71,7 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.psychology, color: AppColors.royalBlue),
+            Icon(Icons.psychology, color: AppColors.primary),
             SizedBox(width: 8),
             Text('MentorBot AI', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -97,7 +97,7 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
               padding: EdgeInsets.all(8.0),
               child: LinearProgressIndicator(
                   backgroundColor: Colors.transparent,
-                  color: AppColors.royalBlue),
+                  color: AppColors.primary),
             ),
           _buildInputArea(),
         ],
@@ -135,7 +135,7 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ActionChip(
-        avatar: Icon(icon, size: 16, color: AppColors.royalBlue),
+        avatar: Icon(icon, size: 16, color: AppColors.primary),
         label: Text(label, style: const TextStyle(fontSize: 12)),
         onPressed: () {
           if (action == 'export') {
@@ -185,7 +185,7 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
               BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: msg.isUser ? AppColors.royalBlue : Colors.white,
+            color: msg.isUser ? AppColors.primary : Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(20),
               topRight: const Radius.circular(20),
@@ -240,7 +240,7 @@ class _MentorBotScreenState extends State<MentorBotScreen> {
             ),
             const SizedBox(width: 12),
             CircleAvatar(
-              backgroundColor: AppColors.royalBlue,
+              backgroundColor: AppColors.primary,
               child: IconButton(
                 onPressed: _handleSend,
                 icon: const Icon(Icons.send_rounded,

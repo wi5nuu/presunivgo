@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../auth/data/models/user_model.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
 import '../providers/profile_provider.dart';
@@ -164,14 +163,16 @@ class ProfileScreen extends ConsumerWidget {
               width: double.infinity,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: [AppColors.primary, AppColors.secondary],
                 ),
               ),
               child: user.bannerImageUrl != null
                   ? Image.network(user.bannerImageUrl!, fit: BoxFit.cover)
                   : const Center(
-                      child: Icon(Icons.school_outlined,
-                          color: Colors.white24, size: 80)),
+                      child: Icon(Icons.star_border_rounded,
+                          color: Colors.white30, size: 80)),
             ),
             // Profile Info
             Positioned(
@@ -507,9 +508,12 @@ class ProfileScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Analytics',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  color: AppColors.textPrimary)),
           const Text('Private to you',
-              style: TextStyle(color: AppColors.textHint, fontSize: 12)),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

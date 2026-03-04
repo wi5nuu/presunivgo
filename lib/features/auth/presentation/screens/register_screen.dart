@@ -112,16 +112,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               Stack(
                 children: [
-                  // Wave Header
+                  // Radiant Magenta Header
                   ClipPath(
                     clipper: WaveClipper(),
                     child: Container(
-                      height: 240,
+                      height: 260,
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                           colors: [AppColors.primary, AppColors.secondary],
                         ),
                       ),

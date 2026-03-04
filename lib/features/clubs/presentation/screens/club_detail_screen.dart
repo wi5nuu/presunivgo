@@ -71,10 +71,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
 
   Widget _buildDrawerHeader() {
     return const UserAccountsDrawerHeader(
-      decoration: BoxDecoration(color: AppColors.navy),
+      decoration: BoxDecoration(color: AppColors.primary),
       currentAccountPicture: CircleAvatar(
         backgroundColor: Colors.white,
-        child: Icon(Icons.groups, color: AppColors.navy),
+        child: Icon(Icons.groups, color: AppColors.primary),
       ),
       accountName:
           Text('IT Club', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -101,11 +101,11 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
     return ListTile(
       leading: Icon(icon,
           size: 20,
-          color: isSelected ? AppColors.royalBlue : AppColors.textSecondary),
+          color: isSelected ? AppColors.primary : AppColors.textSecondary),
       title: Text(
         name,
         style: TextStyle(
-          color: isSelected ? AppColors.royalBlue : AppColors.textPrimary,
+          color: isSelected ? AppColors.primary : AppColors.textPrimary,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
@@ -206,7 +206,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen> {
         child: Row(
           children: [
             IconButton(
-                icon: const Icon(Icons.add_circle, color: AppColors.royalBlue),
+                icon: const Icon(Icons.add_circle, color: AppColors.primary),
                 onPressed: () {}),
             Expanded(
               child: Container(

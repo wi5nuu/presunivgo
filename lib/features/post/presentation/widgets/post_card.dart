@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -72,14 +71,14 @@ class PostCard extends ConsumerWidget {
                   Text(
                     user?.name ?? 'User',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
                         color: AppColors.textPrimary),
                   ),
                   Text(
                     '${user?.headline ?? user?.activityStatus.name ?? 'Member'} • ${timeago.format(post.timestamp)}',
                     style: const TextStyle(
-                        color: AppColors.textHint, fontSize: 11),
+                        color: AppColors.textSecondary, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -88,9 +87,9 @@ class PostCard extends ConsumerWidget {
               loading: () => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(width: 100, height: 12, color: Colors.grey[200]),
+                  Container(width: 100, height: 12, color: Colors.grey[100]),
                   const SizedBox(height: 4),
-                  Container(width: 60, height: 10, color: Colors.grey[200]),
+                  Container(width: 60, height: 10, color: Colors.grey[100]),
                 ],
               ),
               error: (_, __) =>
@@ -112,7 +111,10 @@ class PostCard extends ConsumerWidget {
       child: Text(
         post.content,
         style: const TextStyle(
-            fontSize: 15, color: AppColors.textPrimary, height: 1.4),
+            fontSize: 15,
+            color: AppColors.textPrimary,
+            height: 1.5,
+            fontWeight: FontWeight.w400),
       ),
     );
   }
@@ -120,17 +122,21 @@ class PostCard extends ConsumerWidget {
   Widget _buildImageGallery() {
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceVariant,
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
       ),
       constraints: const BoxConstraints(maxHeight: 400),
       width: double.infinity,
-      child: Image.network(
-        post.imageUrls.first,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Center(
-            child: Icon(Icons.image_not_supported_outlined,
-                color: AppColors.textHint)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          post.imageUrls.first,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Center(
+              child: Icon(Icons.image_not_supported_outlined,
+                  color: AppColors.textHint)),
+        ),
       ),
     );
   }
@@ -151,18 +157,20 @@ class PostCard extends ConsumerWidget {
               child: Row(
                 children: [
                   if (likesCount > 0) ...[
-                    const Icon(Icons.thumb_up,
-                        size: 12, color: AppColors.secondary),
+                    const Icon(Icons.favorite,
+                        size: 14, color: AppColors.primary),
                     const SizedBox(width: 4),
                     Text('$likesCount',
                         style: const TextStyle(
-                            fontSize: 12, color: AppColors.textHint)),
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.bold)),
                   ],
                   const Spacer(),
                   if (commentsCount > 0)
                     Text('$commentsCount comments',
                         style: const TextStyle(
-                            fontSize: 12, color: AppColors.textHint)),
+                            fontSize: 13, color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -171,7 +179,7 @@ class PostCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _ActionButton(
-                icon: isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                icon: isLiked ? Icons.favorite : Icons.favorite_border,
                 label: 'Like',
                 color: isLiked ? AppColors.primary : AppColors.textSecondary,
                 onTap: () => _likePost(ref),

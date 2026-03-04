@@ -28,6 +28,11 @@ class ChatListScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new,
+              size: 20, color: AppColors.primary),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text('Messages',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         actions: [
@@ -71,11 +76,11 @@ class ChatListScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Search messages...',
-          hintStyle: const TextStyle(color: Colors.white60),
-          prefixIcon: const Icon(Icons.search, color: Colors.white60),
+          hintText: 'Search conversations...',
+          hintStyle: const TextStyle(color: Colors.white70),
+          prefixIcon: const Icon(Icons.search, color: Colors.white70),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.2),
+          fillColor: Colors.white.withOpacity(0.15),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,

@@ -18,7 +18,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -66,16 +65,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             Stack(
               children: [
-                // Wave Header
+                // Radiant Magenta Header
                 ClipPath(
                   clipper: WaveClipper(),
                   child: Container(
-                    height: 320,
+                    height: 340,
                     width: double.infinity,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                         colors: [AppColors.primary, AppColors.secondary],
                       ),
                     ),
@@ -83,36 +82,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 // Logo & Welcome Text
                 Positioned(
-                  top: 80,
+                  top: 90,
                   left: 0,
                   right: 0,
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(12),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
                         ),
                         child: Image.asset(
                           'assets/images/logo.png',
-                          height: 60,
+                          height: 65,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       const Text(
                         'PresUnivGo',
                         style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          letterSpacing: 1.2,
+                          letterSpacing: 1.5,
                         ),
                       ),
                       const Text(
-                        'Your Campus Connection',
+                        'Exclusive Social Network',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white70,
                         ),
                       ),
@@ -121,17 +128,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 // Login Card
                 Padding(
-                  padding: const EdgeInsets.only(top: 260, left: 24, right: 24),
+                  padding: const EdgeInsets.only(top: 280, left: 24, right: 24),
                   child: Container(
-                    padding: const EdgeInsets.all(28),
+                    padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                          color: AppColors.primary.withOpacity(0.1),
+                          blurRadius: 30,
+                          offset: const Offset(0, 15),
                         ),
                       ],
                     ),

@@ -33,13 +33,16 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
         title: const Text('Job Marketplace',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.royalBlue,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.royalBlue,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
           tabs: const [
             Tab(text: 'Discover'),
             Tab(text: 'Applied'),
@@ -57,9 +60,11 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showPostJobDialog(context),
-        label: const Text('Post a Job'),
+        label: const Text('Post a Job',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         icon: const Icon(Icons.add),
-        backgroundColor: AppColors.navy,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -251,12 +256,16 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
         selected: isSelected,
         onSelected: (val) {},
         backgroundColor: Colors.white,
-        selectedColor: AppColors.royalBlue.withOpacity(0.2),
-        checkmarkColor: AppColors.royalBlue,
+        selectedColor: AppColors.primary.withOpacity(0.1),
+        checkmarkColor: AppColors.primary,
+        labelStyle: TextStyle(
+          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-              color: isSelected ? AppColors.royalBlue : AppColors.border),
+              color: isSelected ? AppColors.primary : AppColors.border),
         ),
       ),
     );

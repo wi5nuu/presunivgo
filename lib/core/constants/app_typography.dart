@@ -14,7 +14,18 @@ class AppTypography {
         color: AppColors.textPrimary,
       );
 
-   static TextStyle get mono => GoogleFonts.jetBrainsMono(
+  static TextStyle get mono => GoogleFonts.jetBrainsMono(
         color: AppColors.textPrimary,
+      );
+
+  // High-contrast variants for specific UI elements
+  static TextStyle get bodySecondary => GoogleFonts.inter(
+        color: AppColors.textSecondary,
+        fontSize: 14,
+      );
+
+  static TextStyle get caption => GoogleFonts.inter(
+        color: AppColors.textHint,
+        fontSize: 12,
       );
 }

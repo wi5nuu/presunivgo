@@ -46,12 +46,12 @@ class AICareerRoadmapScreen extends StatelessWidget {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: AppColors.royalBlue,
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 3),
                         boxShadow: [
                           BoxShadow(
-                              color: AppColors.royalBlue.withOpacity(0.3),
+                              color: AppColors.primary.withOpacity(0.3),
                               blurRadius: 10)
                         ],
                       ),
@@ -60,7 +60,7 @@ class AICareerRoadmapScreen extends StatelessWidget {
                       Expanded(
                         child: Container(
                             width: 2,
-                            color: AppColors.royalBlue.withOpacity(0.3)),
+                            color: AppColors.primary.withOpacity(0.3)),
                       ),
                   ],
                 ),
@@ -76,13 +76,13 @@ class AICareerRoadmapScreen extends StatelessWidget {
                           Text(m.year,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.royalBlue)),
+                                  color: AppColors.primary)),
                           const SizedBox(height: 8),
                           Text(m.title,
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.navy)),
+                                  color: AppColors.primary)),
                           const SizedBox(height: 12),
                           ...m.items.map((item) => Padding(
                                 padding: const EdgeInsets.only(bottom: 6),
