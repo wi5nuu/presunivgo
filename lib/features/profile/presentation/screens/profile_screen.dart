@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -18,36 +17,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  Future<void> _pickAndUploadImage(
-      BuildContext context, WidgetRef ref, bool isProfile) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-
-    if (image != null) {
-      if (isProfile) {
-        await ref
-            .read(profileControllerProvider.notifier)
-            .uploadProfileImage(File(image.path));
-      } else {
-        await ref
-            .read(profileControllerProvider.notifier)
-            .uploadBannerImage(File(image.path));
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${isProfile ? 'Profile' : 'Banner'} image updated!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-    }
-  }
-
   List<String> _sectionOrder = [
     'about',
     'featured',
@@ -325,45 +294,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         background: Stack(
           children: [
             // Banner
-            GestureDetector(
-              onTap: () => _pickAndUploadImage(context, ref, false),
-              child: Container(
-                height: 180,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.primary, AppColors.secondary],
-                  ),
+            // Banner
+            Container(
+              height: 180,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [AppColors.primary, AppColors.secondary],
                 ),
-                child: Stack(
-                  children: [
-                    if (user.bannerImageUrl != null)
-                      Positioned.fill(
-                        child: Image.network(user.bannerImageUrl!,
-                            fit: BoxFit.cover),
-                      ),
-                    if (user.bannerImageUrl == null)
-                      const Center(
-                        child: Icon(Icons.star_border_rounded,
-                            color: Colors.white30, size: 80),
-                      ),
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(Icons.camera_alt,
-                            color: Colors.white, size: 16),
-                      ),
+              ),
+              child: Stack(
+                children: [
+                  if (user.bannerImageUrl != null &&
+                      user.bannerImageUrl!.isNotEmpty)
+                    Positioned.fill(
+                      child: Image.network(user.bannerImageUrl!,
+                          fit: BoxFit.cover),
                     ),
-                  ],
-                ),
+                  if (user.bannerImageUrl == null ||
+                      user.bannerImageUrl!.isEmpty)
+                    const Center(
+                      child: Icon(Icons.star_border_rounded,
+                          color: Colors.white30, size: 80),
+                    ),
+                ],
               ),
             ),
             // Profile Info
@@ -377,63 +333,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      GestureDetector(
-                        onTap: () => _pickAndUploadImage(context, ref, true),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Stack(
-                            children: [
-                              PUAvatar(
-                                radius: 50,
-                                imageUrl: user.profileImageUrl,
-                                initials:
-                                    user.name.isNotEmpty ? user.name[0] : '?',
-                                borderColor: user.isOpenToWork
-                                    ? AppColors.success
-                                    : Colors.white,
-                              ),
-                              if (user.isOpenToWork)
-                                Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.success,
-                                      borderRadius: BorderRadius.vertical(
-                                          bottom: Radius.circular(50)),
-                                    ),
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 4),
-                                    child: const Text(
-                                      '#OPENTOWORK',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.camera_alt,
-                                      color: Colors.white, size: 14),
-                                ),
-                              ),
-                            ],
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: PUAvatar(
+                          radius: 50,
+                          imageUrl: user.profileImageUrl,
+                          initials: user.name.isNotEmpty ? user.name[0] : '?',
+                          borderColor: user.isOpenToWork
+                              ? AppColors.success
+                              : Colors.white,
                         ),
                       ),
                       const Spacer(),

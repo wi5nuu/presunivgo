@@ -186,7 +186,7 @@ class _MessageStreamProviderElement
   String get chatId => (origin as MessageStreamProvider).chatId;
 }
 
-String _$chatControllerHash() => r'0fff5a8ca3ce5f38d8fd290928b715f210e126dc';
+String _$chatControllerHash() => r'bc2f508237250dc3f2f365ba733da81f22b313f8';
 
 /// See also [ChatController].
 @ProviderFor(ChatController)

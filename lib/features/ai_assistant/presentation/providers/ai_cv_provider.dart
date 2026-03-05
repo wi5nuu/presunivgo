@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/ai_entities.dart';
-import '../../../../core/services/upload_service.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 part 'ai_cv_provider.g.dart';
@@ -13,20 +11,14 @@ class AICVController extends _$AICVController {
     return const AsyncValue.data(null);
   }
 
-  Future<void> uploadAndAnalyzeCV(File cvFile) async {
+  Future<void> uploadAndAnalyzeCV(dynamic cvFile) async {
     final user = ref.read(authStateProvider).value;
     if (user == null) return;
 
     state = const AsyncValue.loading();
 
     try {
-      // 1. Upload CV
-      final uploadPath =
-          'users/${user.uid}/cvs/${DateTime.now().millisecondsSinceEpoch}.pdf';
-      await ref.read(uploadServiceProvider).uploadFile(
-            file: cvFile,
-            path: uploadPath,
-          );
+      // 1. Skip Upload (No storage allowed)
 
       // 2. Simulate AI Analysis Delay/Steps
       await Future.delayed(const Duration(seconds: 1));

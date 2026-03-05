@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/pu_button.dart';
 import '../providers/post_provider.dart';
@@ -19,7 +17,6 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
   final _textController = TextEditingController();
   String _visibility = 'Public';
   final List<String> _visibilities = ['Public', 'Connections', 'Private'];
-  File? _selectedImage;
   bool _isUploading = false;
 
   @override
@@ -28,33 +25,13 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-
-    if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
-    }
-  }
-
   Future<void> _handlePost() async {
-    if (_textController.text.trim().isEmpty && _selectedImage == null) return;
+    if (_textController.text.trim().isEmpty) return;
 
     setState(() => _isUploading = true);
 
     try {
       List<String> imageUrls = [];
-      if (_selectedImage != null) {
-        final url = await ref
-            .read(postControllerProvider.notifier)
-            .uploadMedia(_selectedImage!);
-        imageUrls.add(url);
-      }
 
       await ref.read(postControllerProvider.notifier).createPost(
             _textController.text.trim(),
@@ -111,31 +88,6 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
                     ),
                     style: const TextStyle(fontSize: 18),
                   ),
-                  if (_selectedImage != null)
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(_selectedImage!,
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: GestureDetector(
-                            onTap: () => setState(() => _selectedImage = null),
-                            child: const CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.black54,
-                              child: Icon(Icons.close,
-                                  size: 16, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                 ],
               ),
             ),
@@ -145,10 +97,8 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
           PUButton(
             text: 'Post',
             isLoading: _isUploading || postState.isLoading,
-            onPressed: (_textController.text.trim().isNotEmpty ||
-                    _selectedImage != null)
-                ? _handlePost
-                : null,
+            onPressed:
+                (_textController.text.trim().isNotEmpty) ? _handlePost : null,
           ),
         ],
       ),
@@ -219,9 +169,6 @@ class _CreatePostModalState extends ConsumerState<CreatePostModal> {
   Widget _buildAttachmentToolbar() {
     return Row(
       children: [
-        IconButton(
-            icon: const Icon(Icons.image_outlined, color: AppColors.royalBlue),
-            onPressed: _pickImage),
         IconButton(
             icon: const Icon(Icons.description_outlined,
                 color: AppColors.textSecondary),

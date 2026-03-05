@@ -4,6 +4,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 
 abstract class ProfileRepository {
   Future<UserEntity?> getProfile(String uid);
+  Stream<UserEntity?> getUserStream(String uid);
   Future<void> updateProfile(UserEntity user);
   Future<List<UserEntity>> searchAlumni(String query);
 }
@@ -20,6 +21,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return UserModel.fromJson(doc.data()!);
     }
     return null;
+  }
+
+  @override
+  Stream<UserEntity?> getUserStream(String uid) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .map((doc) => doc.exists ? UserModel.fromJson(doc.data()!) : null);
   }
 
   @override

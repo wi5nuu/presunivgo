@@ -6,7 +6,7 @@ part of 'upload_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$uploadServiceHash() => r'5abc5f5fd32f063fe983e2ef98854333ee453d07';
+String _$uploadServiceHash() => r'1d68b7dc410a32c977d597f8668a3cda50f820f0';
 
 /// See also [uploadService].
 @ProviderFor(uploadService)

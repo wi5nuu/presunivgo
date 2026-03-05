@@ -21,6 +21,22 @@ final profileRepositoryProvider = Provider<ProfileRepository>.internal(
 );
 
 typedef ProfileRepositoryRef = ProviderRef<ProfileRepository>;
+String _$userProfileStreamHash() => r'36f2a34bb66c6085af15a73b7ccc6d65f3847453';
+
+/// See also [userProfileStream].
+@ProviderFor(userProfileStream)
+final userProfileStreamProvider =
+    AutoDisposeStreamProvider<UserEntity?>.internal(
+  userProfileStream,
+  name: r'userProfileStreamProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$userProfileStreamHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef UserProfileStreamRef = AutoDisposeStreamProviderRef<UserEntity?>;
 String _$userProfileHash() => r'fc643bb59d4d0e68f4b36d4df3452a44be897739';
 
 /// Copied from Dart SDK
@@ -170,7 +186,7 @@ class _UserProfileProviderElement
   String get uid => (origin as UserProfileProvider).uid;
 }
 
-String _$profileControllerHash() => r'86c1544345a602440deff22870f075c0ffcea8b3';
+String _$profileControllerHash() => r'9cef11fd4ff735d46b9ed4b796f4830109eb707a';
 
 /// See also [ProfileController].
 @ProviderFor(ProfileController)

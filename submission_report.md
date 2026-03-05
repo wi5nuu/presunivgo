@@ -32,14 +32,15 @@ Fragmentation of professional data and communication channels at President Unive
 ### 4.1. The "Clean Architecture" Pattern
 The application core is developed using a multi-layered approach to maximize modularity and maintainability:
 -   **Domain Layer**: Encapsulates pure business entities (e.g., `UserEntity`, `PostEntity`) and repository contracts. This layer is platform-agnostic.
--   **Data Layer**: Responsible for external data mapping. It converts Firestore JSON into typed Models and implements the repositories using `FirebaseFirestore` and `FirebaseStorage` SDKs.
+-   **Data Layer**: Responsible for external data mapping. It converts Firestore JSON into typed Models and implements the repositories using the `FirebaseFirestore` SDK.
+
 -   **Presentation Layer**: Utilizes the **Riverpod** state management ecosystem. It employs `StateNotifierProvider` to observe business logic and `AsyncValue` to handle network states (Loading, Data, Error) reactively.
 
 ### 4.2. Cloud Infrastructure (MBaaS)
 The system utilizes a tailored Firebase implementation:
 -   **Authentication Layer**: Secure JWT-based auth with integrated **Google OAuth** support.
 -   **NoSQL Data Tier**: Cloud Firestore handles sub-second real-time synchronization for the Feed and Messaging modules.
--   **Media Tier**: Firebase Storage utilizes optimized blob storage for user-generated content (Stories and Profiles).
+
 -   **Hosting**: Globally distributed CDN for the web-based high-fidelity dashboard.
 
 ---

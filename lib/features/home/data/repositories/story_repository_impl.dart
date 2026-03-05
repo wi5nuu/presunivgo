@@ -6,7 +6,7 @@ import '../../domain/repositories/story_repository.dart';
 class StoryRepositoryImpl implements StoryRepository {
   final FirebaseFirestore _firestore;
 
-  StoryRepositoryImpl(this._firestore, _);
+  StoryRepositoryImpl(this._firestore);
 
   @override
   Stream<List<StoryEntity>> getStories() {

@@ -60,7 +60,7 @@ class MainScreen extends StatelessWidget {
 
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/dashboard')) return 0;
+    if (location.startsWith('/home')) return 0;
     if (location.startsWith('/jobs')) return 1;
     if (location.startsWith('/network')) return 2;
     if (location.startsWith('/chat')) return 3;
@@ -71,7 +71,7 @@ class MainScreen extends StatelessWidget {
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
-        context.go('/dashboard');
+        context.go('/home');
         break;
       case 1:
         context.go('/jobs');

@@ -276,8 +276,6 @@ class CreatePostPlaceholder extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Icon(Icons.image_outlined,
-              color: AppColors.secondary, size: 22),
         ],
       ),
     ).animate().fadeIn().slideY(begin: 0.2);

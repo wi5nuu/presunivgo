@@ -6,7 +6,7 @@ part of 'ai_cv_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$aICVControllerHash() => r'a3c8688fabe8039a18fdaf5a55c2ea1e697dd51d';
+String _$aICVControllerHash() => r'3e10c4c50e8729c414ba2af7440adf935b5f6b4e';
 
 /// See also [AICVController].
 @ProviderFor(AICVController)

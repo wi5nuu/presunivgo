@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +5,6 @@ import '../../domain/entities/post_entity.dart';
 import '../../domain/repositories/post_repository.dart';
 import '../../data/repositories/post_repository_impl.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../../core/services/upload_service.dart';
 
 part 'post_provider.g.dart';
 
@@ -46,18 +44,6 @@ class PostController extends _$PostController {
       );
       await ref.read(postRepositoryProvider).createPost(post);
     });
-  }
-
-  Future<String> uploadMedia(File file) async {
-    final user = ref.read(authStateProvider).value;
-    if (user == null) throw Exception('User not logged in');
-
-    final path =
-        'posts/${user.uid}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    return await ref.read(uploadServiceProvider).uploadFile(
-          file: file,
-          path: path,
-        );
   }
 
   Future<void> reactToPost(String postId, String reactionType) async {

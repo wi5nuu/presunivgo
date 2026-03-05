@@ -1,36 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/story_provider.dart';
+
 import '../../domain/entities/story_entity.dart';
 
 class StoryBar extends ConsumerWidget {
   const StoryBar({super.key});
 
-  Future<void> _pickAndUploadStory(BuildContext context, WidgetRef ref) async {
-    final picker = ImagePicker();
-    final image =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-
-    if (image != null) {
-      final file = File(image.path);
-      await ref.read(storyControllerProvider.notifier).uploadStory(file);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Story uploaded successfully!')),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileState = ref.watch(profileControllerProvider);
     final storiesState = ref.watch(storiesStreamProvider);
-    final uploadingState = ref.watch(storyControllerProvider);
 
     return Container(
       height: 110,
@@ -49,84 +29,14 @@ class StoryBar extends ConsumerWidget {
           return ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: displayStories.length + 1,
+            itemCount: displayStories.length,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return _buildAddStory(
-                    context,
-                    ref,
-                    profileState.value,
-                    uploadingState.uploadStatus.isLoading,
-                    uploadingState.progress);
-              }
-              return _buildStoryItem(context, displayStories[index - 1]);
+              return _buildStoryItem(context, displayStories[index]);
             },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error loading stories')),
-      ),
-    );
-  }
-
-  Widget _buildAddStory(BuildContext context, WidgetRef ref, dynamic user,
-      bool isUploading, double progress) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: GestureDetector(
-        onTap: isUploading ? null : () => _pickAndUploadStory(context, ref),
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.border, width: 1),
-                  ),
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: AppColors.surfaceVariant,
-                    backgroundImage: user?.profileImageUrl != null
-                        ? NetworkImage(user!.profileImageUrl!)
-                        : null,
-                    child: user?.profileImageUrl == null || isUploading
-                        ? (isUploading
-                            ? CircularProgressIndicator(
-                                value: progress, strokeWidth: 2)
-                            : const Icon(Icons.person,
-                                color: AppColors.textHint, size: 30))
-                        : null,
-                  ),
-                ),
-                Positioned(
-                  bottom: 2,
-                  right: 2,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.add_circle,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Your Story',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary),
-            ),
-          ],
-        ),
       ),
     );
   }

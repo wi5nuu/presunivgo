@@ -35,7 +35,7 @@ final feedProvider = AutoDisposeStreamProvider<List<PostEntity>>.internal(
 );
 
 typedef FeedRef = AutoDisposeStreamProviderRef<List<PostEntity>>;
-String _$postControllerHash() => r'95a38c764444ea6616a3f0178cc546a2045d5d4a';
+String _$postControllerHash() => r'0be9bddd881f4e3a6d04415efcb6f80e1e2eabff';
 
 /// See also [PostController].
 @ProviderFor(PostController)
