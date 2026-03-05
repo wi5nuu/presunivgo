@@ -49,6 +49,7 @@ class MessageModel extends MessageEntity {
     super.attachmentUrl,
     required super.timestamp,
     super.readBy,
+    super.deliveredTo,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -60,6 +61,7 @@ class MessageModel extends MessageEntity {
       attachmentUrl: json['attachment_url'] as String?,
       timestamp: (json['timestamp'] as Timestamp).toDate(),
       readBy: List<String>.from(json['read_by'] ?? []),
+      deliveredTo: List<String>.from(json['delivered_to'] ?? []),
     );
   }
 
@@ -72,6 +74,7 @@ class MessageModel extends MessageEntity {
       'attachment_url': attachmentUrl,
       'timestamp': Timestamp.fromDate(timestamp),
       'read_by': readBy,
+      'delivered_to': deliveredTo,
     };
   }
 }

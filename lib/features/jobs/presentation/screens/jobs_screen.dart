@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../widgets/job_card.dart';
 import '../providers/job_provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class JobMarketplaceScreen extends ConsumerStatefulWidget {
   const JobMarketplaceScreen({super.key});
@@ -66,13 +67,16 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
           const Center(child: Text('No saved jobs')),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showPostJobDialog(context),
-        label: const Text('Post a Job',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        icon: const Icon(Icons.add),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: FloatingActionButton.extended(
+          onPressed: () => _showPostJobDialog(context),
+          label: const Text('Post a Job',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          icon: const Icon(Icons.add),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        ),
       ),
     );
   }
@@ -216,7 +220,15 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
           if (jobs.isEmpty)
             const Center(child: Text('No jobs available at the moment'))
           else
-            ...jobs.map((job) => JobCard(job: job)),
+            ...jobs
+                .asMap()
+                .entries
+                .map((entry) => JobCard(job: entry.value)
+                    .animate(delay: (100 * entry.key).ms)
+                    .fadeIn(duration: 400.ms)
+                    .slideX(begin: 0.1, curve: Curves.easeOutQuad))
+                .toList(),
+          const SizedBox(height: 100), // Bottom padding for navbar
         ],
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -301,6 +313,7 @@ class _JobMarketplaceScreenState extends ConsumerState<JobMarketplaceScreen>
           'Applied',
           0,
         ),
+        const SizedBox(height: 100), // Bottom padding for navbar
       ],
     );
   }

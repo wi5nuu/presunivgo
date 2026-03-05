@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -113,7 +114,7 @@ class _AdminBody extends ConsumerWidget {
                   color: AppColors.lecturerColor,
                 ),
               ],
-            ),
+            ).animate().fadeIn().slideY(begin: 0.1, delay: 200.ms),
             const SizedBox(height: 24),
 
             // Recent Users

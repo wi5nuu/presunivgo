@@ -50,6 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   List<String> _sectionOrder = [
     'about',
+    'featured',
     'experience',
     'education',
     'skills',
@@ -128,7 +129,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildAnalyticsWidget(),
+                _buildAnalyticsWidget(user),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -160,6 +161,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     for (final key in _sectionOrder) {
       if (key == 'about') {
         widgets.add(_buildAboutSection(user));
+      } else if (key == 'featured') {
+        widgets.add(_buildFeaturedSection(user));
       } else if (key == 'experience') {
         widgets.add(_buildExperienceSection(context, ref, user));
       } else if (key == 'education') {
@@ -287,7 +290,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildHeader(BuildContext context, WidgetRef ref, UserEntity user) {
     return SliverAppBar(
-      expandedHeight: 280,
+      expandedHeight: 460,
       pinned: true,
       backgroundColor: AppColors.primary,
       actions: [
@@ -435,8 +438,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const Spacer(),
                       ElevatedButton(
-                        onPressed: () =>
-                            _showEditProfileDialog(context, ref, user),
+                        onPressed: () => _showOpenToDialog(context, ref, user),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -449,84 +451,168 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Row(
+                  const SizedBox(height: 12),
+                  // Name and Verification
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         user.name,
                         style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary),
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.2),
                       ),
                       if (user.isVerified) ...[
                         const SizedBox(width: 8),
                         const Icon(Icons.verified,
-                            color: AppColors.secondary, size: 20),
+                            color: AppColors.secondary, size: 22),
                       ],
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => _showVerificationInfo(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white70),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.shield_outlined,
+                                  size: 12, color: AppColors.secondary),
+                              SizedBox(width: 4),
+                              Text('Add verification badge',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
+                  // Headline (Multi-line)
+                  Text(
+                    user.headline ?? '',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.white,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // School and Company
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.secondary.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Text(
-                          user.activityStatus.name.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                      ),
-                      if (user.currentCompany != null) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '@ ${user.currentCompany}',
-                          style: const TextStyle(
+                      const Icon(Icons.business_center,
+                          size: 16, color: Colors.white70),
+                      const SizedBox(width: 8),
+                      Text(
+                        user.currentCompany ?? '',
+                        style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                      const Text(' • ',
+                          style: TextStyle(color: Colors.white70)),
+                      Text(
+                        user.faculty ?? '',
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    user.headline ?? 'President University Student',
-                    style: const TextStyle(
-                        fontSize: 16, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 4),
-                  const Row(
+                  // Location
+                  Text(
+                    user.location ?? '',
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                  const SizedBox(height: 12),
+                  // Connection count
+                  Text(
+                    '${user.connections.length} connections',
+                    style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  // Professional Actions
+                  Row(
                     children: [
-                      Icon(Icons.location_on_outlined,
-                          size: 14, color: AppColors.textHint),
-                      SizedBox(width: 4),
-                      Text(
-                        'Cikarang, Indonesia',
-                        style:
-                            TextStyle(fontSize: 14, color: AppColors.textHint),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              _showOpenToDialog(context, ref, user),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Open to',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
                       ),
-                      SizedBox(width: 16),
-                      Text(
-                        '500+ connections',
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.bold),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              _showAddSectionMenu(context, ref, user),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white70),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Add section',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white70),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () {},
+                          icon:
+                              const Icon(Icons.more_horiz, color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  // LinkIdn style button
+                  OutlinedButton(
+                    onPressed: () => _showEnhanceProfileDialog(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                      side: const BorderSide(color: AppColors.secondary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      minimumSize: const Size(double.infinity, 40),
+                    ),
+                    child: const Text('Enhance profile',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -716,6 +802,275 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  void _showOpenToDialog(BuildContext context, WidgetRef ref, UserEntity user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(height: 24),
+          const Text('Show recruiters you\'re open',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ListTile(
+            leading:
+                const CircleAvatar(child: Icon(Icons.business_center_outlined)),
+            title: const Text('Finding a new job'),
+            subtitle: const Text('Show the #OPENTOWORK badge on your profile'),
+            trailing: Switch(
+              value: user.isOpenToWork,
+              onChanged: (val) async {
+                await ref
+                    .read(profileControllerProvider.notifier)
+                    .updateProfile(user.copyWith(isOpenToWork: val));
+                if (context.mounted) Navigator.pop(ctx);
+              },
+            ),
+          ),
+          ListTile(
+            leading: const CircleAvatar(child: Icon(Icons.person_add_outlined)),
+            title: const Text('Hiring'),
+            subtitle: const Text('Share that you\'re hiring to find talent'),
+            onTap: () => Navigator.pop(ctx),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  void _showAddSectionMenu(
+      BuildContext context, WidgetRef ref, UserEntity user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Add to Profile',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.business_center),
+            title: const Text('Add experience'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showAddExperienceDialog(context, ref, user);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.school),
+            title: const Text('Add education'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showAddEducationDialog(context, ref, user);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.psychology),
+            title: const Text('Add skill'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showAddSkillDialog(context, ref, user);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.code),
+            title: const Text('Add project'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showAddProjectDialog(context, ref, user);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.card_membership),
+            title: const Text('Add certification'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showAddCertificationDialog(context, ref, user);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddProjectDialog(
+      BuildContext context, WidgetRef ref, UserEntity user) {
+    final titleCtrl = TextEditingController();
+    final roleCtrl = TextEditingController();
+    final durationCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Project'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+                controller: titleCtrl,
+                decoration: const InputDecoration(labelText: 'Project Title')),
+            TextField(
+                controller: roleCtrl,
+                decoration: const InputDecoration(labelText: 'Your Role')),
+            TextField(
+                controller: durationCtrl,
+                decoration: const InputDecoration(labelText: 'Duration')),
+            TextField(
+                controller: descCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Description')),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              final newProj = {
+                'title': titleCtrl.text.trim(),
+                'role': roleCtrl.text.trim(),
+                'duration': durationCtrl.text.trim(),
+                'description': descCtrl.text.trim(),
+              };
+              final updatedProjs =
+                  List<Map<String, dynamic>>.from(user.projects)..add(newProj);
+              await ref
+                  .read(profileControllerProvider.notifier)
+                  .updateProfile(user.copyWith(projects: updatedProjs));
+              if (context.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddCertificationDialog(
+      BuildContext context, WidgetRef ref, UserEntity user) {
+    final nameCtrl = TextEditingController();
+    final issuerCtrl = TextEditingController();
+    final dateCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Certification'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+                controller: nameCtrl,
+                decoration:
+                    const InputDecoration(labelText: 'Certification Name')),
+            TextField(
+                controller: issuerCtrl,
+                decoration:
+                    const InputDecoration(labelText: 'Issuing Organization')),
+            TextField(
+                controller: dateCtrl,
+                decoration: const InputDecoration(labelText: 'Issue Date')),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              final newCert = {
+                'name': nameCtrl.text.trim(),
+                'issuer': issuerCtrl.text.trim(),
+                'date': dateCtrl.text.trim(),
+              };
+              final updatedCerts =
+                  List<Map<String, dynamic>>.from(user.certifications)
+                    ..add(newCert);
+              await ref
+                  .read(profileControllerProvider.notifier)
+                  .updateProfile(user.copyWith(certifications: updatedCerts));
+              if (context.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnhanceProfileDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: AppColors.secondary),
+            SizedBox(width: 8),
+            Text('AI Profile Enhancer'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'COMING SOON!',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: AppColors.secondary),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Our AI Career Mentor will soon be able to analyze your profile and provide personalized suggestions to make it stand out to recruiters.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.secondary),
+            child: const Text('Exciting!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVerificationInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Profile Verification'),
+        content: const Text(
+            'Verification badges are currently managed by the university administration. Please ensure your student/alumni status is updated to receive your badge automatically.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Got it')),
+        ],
+      ),
+    );
+  }
+
   void _showAddSkillDialog(
       BuildContext context, WidgetRef ref, UserEntity user) {
     final skillCtrl = TextEditingController();
@@ -749,7 +1104,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildAnalyticsWidget() {
+  Widget _buildAnalyticsWidget(UserEntity user) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -762,41 +1117,92 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           const Text('Analytics',
               style: TextStyle(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   fontSize: 18,
                   color: AppColors.textPrimary)),
-          const Text('Private to you',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-          const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildAnalyticsItem(Icons.people, '124', 'Profile views'),
-              _buildAnalyticsItem(Icons.bar_chart, '542', 'Post impressions'),
-              _buildAnalyticsItem(Icons.search, '89', 'Search appearances'),
+              const Icon(Icons.visibility_off,
+                  size: 14, color: AppColors.textSecondary),
+              const SizedBox(width: 4),
+              const Text('Private to you',
+                  style:
+                      TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             ],
+          ),
+          const SizedBox(height: 16),
+          _buildAnalyticsDetailItem(
+            Icons.people_alt_rounded,
+            '0 profile views',
+            'Discover who\'s viewed your profile.',
+          ),
+          const Divider(height: 24),
+          _buildAnalyticsDetailItem(
+            Icons.bar_chart_rounded,
+            '0 post impressions',
+            'Check out who\'s engaging with your posts.\nPast 7 days',
+          ),
+          const Divider(height: 24),
+          _buildAnalyticsDetailItem(
+            Icons.search_rounded,
+            '0 search appearances',
+            'See how often you appear in search results.',
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          Center(
+            child: TextButton(
+              onPressed: () {},
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Show all analytics',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Icon(Icons.arrow_forward, size: 16),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAnalyticsItem(IconData icon, String value, String label) {
-    return Column(
+  Widget _buildAnalyticsDetailItem(
+      IconData icon, String title, String subtitle) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 16, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
-            Text(value,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          ],
+        Icon(icon, color: AppColors.textPrimary, size: 24),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15)),
+              Text(subtitle,
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary)),
+            ],
+          ),
         ),
-        Text(label,
-            style:
-                const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
       ],
+    );
+  }
+
+  Widget _buildFeaturedSection(UserEntity user) {
+    return _buildSectionContainer(
+      title: 'Featured',
+      onAdd: () {},
+      child: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Text('No featured items to show',
+              style: TextStyle(color: AppColors.textHint)),
+        ),
+      ),
     );
   }
 
@@ -859,34 +1265,56 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildSkillsSection(
       BuildContext context, WidgetRef ref, UserEntity user) {
     return _buildSectionContainer(
-      title: 'Skills',
+      title: 'Top skills',
       onAdd: () => _showAddSkillDialog(context, ref, user),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: user.skills.isEmpty
-            ? [
-                const Text('No skills added yet.',
-                    style: TextStyle(color: AppColors.textHint))
-              ]
-            : user.skills
-                .map((s) => Chip(
-                      label: Text(s),
-                      backgroundColor: AppColors.surfaceVariant,
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      onDeleted: () async {
-                        final updatedSkills = List<String>.from(user.skills)
-                          ..remove(s);
-                        await ref
-                            .read(profileControllerProvider.notifier)
-                            .updateProfile(
-                                user.copyWith(skills: updatedSkills));
-                      },
-                      deleteIconColor: AppColors.error,
-                    ))
-                .toList(),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.diamond_outlined,
+                  color: AppColors.textSecondary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  user.skills.take(5).join(' • '),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary),
+                ),
+              ),
+              const Icon(Icons.arrow_forward, color: AppColors.textSecondary),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Divider(),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: user.skills.isEmpty
+                ? [
+                    const Text('No skills added yet.',
+                        style: TextStyle(color: AppColors.textHint))
+                  ]
+                : user.skills
+                    .map((s) => Chip(
+                          label: Text(s),
+                          backgroundColor: AppColors.surfaceVariant,
+                          side: BorderSide.none,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          onDeleted: () async {
+                            final updatedSkills = List<String>.from(user.skills)
+                              ..remove(s);
+                            await ref
+                                .read(profileControllerProvider.notifier)
+                                .updateProfile(
+                                    user.copyWith(skills: updatedSkills));
+                          },
+                          deleteIconColor: AppColors.error,
+                        ))
+                    .toList(),
+          ),
+        ],
       ),
     );
   }
@@ -895,9 +1323,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       BuildContext context, WidgetRef ref, UserEntity user) {
     return _buildSectionContainer(
       title: 'Projects',
-      onAdd: () {
-        // Mock add project action, logic similar to others
-      },
+      onAdd: () => _showAddProjectDialog(context, ref, user),
       child: Column(
         children: user.projects.isEmpty
             ? [
@@ -920,9 +1346,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       BuildContext context, WidgetRef ref, UserEntity user) {
     return _buildSectionContainer(
       title: 'Certifications',
-      onAdd: () {
-        // Mock add cert action
-      },
+      onAdd: () => _showAddCertificationDialog(context, ref, user),
       child: Column(
         children: user.certifications.isEmpty
             ? [

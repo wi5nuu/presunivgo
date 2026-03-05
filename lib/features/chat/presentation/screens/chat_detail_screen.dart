@@ -118,17 +118,31 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         children: [
           Expanded(
             child: messagesState.when(
-              data: (messages) => ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                reverse: true,
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  final isMe = message.senderUid == currentUser?.uid;
-                  return _MessageBubble(isMe: isMe, message: message);
-                },
-              ),
+              data: (messages) {
+                // Mark messages as read when they arrive
+                if (messages.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ref
+                        .read(chatControllerProvider.notifier)
+                        .markAsRead(widget.chatId);
+                  });
+                }
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isMe = message.senderUid == currentUser?.uid;
+                    return _MessageBubble(
+                      isMe: isMe,
+                      message: message,
+                      otherUid: otherParticipantUid ?? '',
+                    );
+                  },
+                );
+              },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, __) => Center(child: Text('Error: $err')),
             ),
@@ -218,8 +232,13 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
 class _MessageBubble extends StatelessWidget {
   final bool isMe;
   final MessageEntity message;
+  final String otherUid;
 
-  const _MessageBubble({required this.isMe, required this.message});
+  const _MessageBubble({
+    required this.isMe,
+    required this.message,
+    required this.otherUid,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -261,13 +280,40 @@ class _MessageBubble extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              timeago.format(message.timestamp, locale: 'en_short'),
-              style: const TextStyle(fontSize: 10, color: AppColors.textHint),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  timeago.format(message.timestamp, locale: 'en_short'),
+                  style:
+                      const TextStyle(fontSize: 10, color: AppColors.textHint),
+                ),
+                if (isMe) ...[
+                  const SizedBox(width: 4),
+                  _buildStatusIcon(),
+                ],
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildStatusIcon() {
+    final isRead = message.readBy.contains(otherUid);
+    // Simulate delivered if the message is in deliveredTo or we assume it's reached the server
+    final isDelivered = message.deliveredTo.contains(otherUid) || true;
+
+    if (isRead) {
+      return const Icon(Icons.done_all,
+          size: 14, color: Color(0xFF9C27B0)); // Purple
+    } else if (isDelivered) {
+      return const Icon(Icons.done_all,
+          size: 14, color: AppColors.textHint); // Gray x2
+    } else {
+      return const Icon(Icons.done,
+          size: 14, color: AppColors.textHint); // Gray x1
+    }
   }
 }

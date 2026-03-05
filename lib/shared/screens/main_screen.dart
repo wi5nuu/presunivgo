@@ -11,7 +11,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Crucial for floating navbar
+      extendBody: false, // Prevents navbar from overlapping content
       body: child,
       bottomNavigationBar: _buildFloatingNavBar(context),
     );

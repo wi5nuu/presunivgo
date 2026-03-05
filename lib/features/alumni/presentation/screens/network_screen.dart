@@ -1,33 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/pu_avatar.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/network_provider.dart';
+import '../providers/connection_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 
 class NetworkScreen extends ConsumerWidget {
   const NetworkScreen({super.key});
 
   Future<void> _connect(
       BuildContext context, WidgetRef ref, String targetUid) async {
-    final currentUser = ref.read(authStateProvider).value;
-    if (currentUser == null) return;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .update({
-      'connections': FieldValue.arrayUnion([targetUid]),
-    });
-    await FirebaseFirestore.instance.collection('users').doc(targetUid).update({
-      'connections': FieldValue.arrayUnion([currentUser.uid]),
-    });
-
-    ref.invalidate(suggestedPeopleProvider);
-    ref.invalidate(myConnectionsProvider);
+    final controller = ref.read(connectionControllerProvider);
+    await controller.sendRequest(targetUid);
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -43,6 +31,8 @@ class NetworkScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestedAsync = ref.watch(suggestedPeopleProvider);
     final connectionsAsync = ref.watch(myConnectionsProvider);
+    final requestsAsync = ref.watch(connectionRequestsProvider);
+    final sentRequestsAsync = ref.watch(sentRequestsProvider);
     final currentUser = ref.watch(authStateProvider).value;
 
     return Scaffold(
@@ -89,6 +79,46 @@ class NetworkScreen extends ConsumerWidget {
             ),
           ),
 
+          // Pending Requests
+          requestsAsync.when(
+            data: (requests) => requests.isEmpty
+                ? const SliverToBoxAdapter(child: SizedBox.shrink())
+                : SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
+                          child: Text(
+                            'Pending Requests',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary),
+                          ),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: requests.length,
+                          itemBuilder: (ctx, i) => _RequestListTile(
+                            request: requests[i],
+                            onAccept: () => ref
+                                .read(connectionControllerProvider)
+                                .acceptRequest(requests[i]),
+                            onReject: () => ref
+                                .read(connectionControllerProvider)
+                                .rejectRequest(requests[i]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+            loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (_, __) =>
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
+          ),
+
           // People You May Know
           const SliverToBoxAdapter(
             child: Padding(
@@ -116,9 +146,16 @@ class NetworkScreen extends ConsumerWidget {
                           final person = people[index];
                           final alreadyConnected = currentUser != null &&
                               person.connections.contains(currentUser.uid);
+                          final sentRequest = sentRequestsAsync.value?.any(
+                                  (r) =>
+                                      r.toUid == person.uid &&
+                                      r.status == ConnectionStatus.pending) ??
+                              false;
+
                           return _SuggestedPersonCard(
                             person: person,
                             alreadyConnected: alreadyConnected,
+                            isPending: sentRequest,
                             onConnect: () => _connect(context, ref, person.uid),
                           );
                         },
@@ -186,8 +223,6 @@ class NetworkScreen extends ConsumerWidget {
   }
 }
 
-// ─── Subwidgets ────────────────────────────────────────────────────────────────
-
 class _ConnectionBanner extends StatelessWidget {
   final int count;
   const _ConnectionBanner({required this.count});
@@ -246,11 +281,13 @@ class _ConnectionBanner extends StatelessWidget {
 class _SuggestedPersonCard extends StatelessWidget {
   final UserEntity person;
   final bool alreadyConnected;
+  final bool isPending;
   final VoidCallback onConnect;
 
   const _SuggestedPersonCard({
     required this.person,
     required this.alreadyConnected,
+    this.isPending = false,
     required this.onConnect,
   });
 
@@ -342,19 +379,30 @@ class _SuggestedPersonCard extends StatelessWidget {
                     child:
                         const Text('Connected', style: TextStyle(fontSize: 11)),
                   )
-                : ElevatedButton(
-                    onPressed: onConnect,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: const Text('Connect',
-                        style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.bold)),
-                  ),
+                : isPending
+                    ? OutlinedButton(
+                        onPressed: null,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Pending',
+                            style: TextStyle(fontSize: 11)),
+                      )
+                    : ElevatedButton(
+                        onPressed: onConnect,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Connect',
+                            style: TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
           ),
         ],
       ),
@@ -394,6 +442,53 @@ class _ConnectionListTile extends StatelessWidget {
         child: const Text('Message',
             style: TextStyle(color: AppColors.primary, fontSize: 12)),
       ),
+    );
+  }
+}
+
+class _RequestListTile extends ConsumerWidget {
+  final ConnectionRequest request;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  const _RequestListTile({
+    required this.request,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userProfileProvider(request.fromUid));
+
+    return userAsync.when(
+      data: (user) => user == null
+          ? const SizedBox.shrink()
+          : ListTile(
+              leading: PUAvatar(
+                radius: 24,
+                imageUrl: user.profileImageUrl,
+                initials: user.name.isNotEmpty ? user.name[0] : '?',
+              ),
+              title: Text(user.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(user.headline ?? 'Wants to connect'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check_circle, color: Colors.green),
+                    onPressed: onAccept,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.cancel, color: Colors.red),
+                    onPressed: onReject,
+                  ),
+                ],
+              ),
+            ),
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

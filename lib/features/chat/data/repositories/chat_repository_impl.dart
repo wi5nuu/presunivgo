@@ -41,6 +41,8 @@ class ChatRepositoryImpl implements ChatRepository {
       content: message.content,
       type: message.type,
       timestamp: message.timestamp,
+      readBy: message.readBy,
+      deliveredTo: message.deliveredTo,
     );
 
     await _firestore
@@ -69,7 +71,30 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<void> markAsRead(String chatId) async {
-    // Logic to clear unread counts for current user
+  Future<void> markAsRead(String chatId, String userId) async {
+    final batch = _firestore.batch();
+
+    // 1. Clear unread count
+    batch.update(_firestore.collection('chats').doc(chatId), {
+      'unread_counts.$userId': 0,
+    });
+
+    // 2. Mark all messages from others as read by me
+    final messages = await _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .where('sender_uid', isNotEqualTo: userId)
+        .get();
+
+    for (var doc in messages.docs) {
+      if (!(List<String>.from(doc.data()['read_by'] ?? []).contains(userId))) {
+        batch.update(doc.reference, {
+          'read_by': FieldValue.arrayUnion([userId])
+        });
+      }
+    }
+
+    await batch.commit();
   }
 }

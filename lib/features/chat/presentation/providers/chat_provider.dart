@@ -62,6 +62,12 @@ class ChatController extends _$ChatController {
       await doc.delete();
     }
   }
+
+  Future<void> markAsRead(String chatId) async {
+    final user = ref.read(authStateProvider).value;
+    if (user == null) return;
+    await ref.read(chatRepositoryProvider).markAsRead(chatId, user.uid);
+  }
 }
 
 /// Stream of UIDs currently typing in [chatId] (excluding self).

@@ -28,6 +28,7 @@ class MessageEntity {
   final String? attachmentUrl;
   final DateTime timestamp;
   final List<String> readBy;
+  final List<String> deliveredTo;
 
   MessageEntity({
     required this.messageId,
@@ -37,5 +38,6 @@ class MessageEntity {
     this.attachmentUrl,
     required this.timestamp,
     this.readBy = const [],
+    this.deliveredTo = const [],
   });
 }
